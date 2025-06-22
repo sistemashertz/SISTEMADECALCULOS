@@ -1,0 +1,20 @@
+[
+  {
+    "fecha": "2025-06-19T16:50:06.093114",
+    "calibre": "10",
+    "cantidad": 5,
+    "factor_ocupacion": 40,
+    "tuberia_recomendada": "1",
+    "area_requerida": 352.37500000000006,
+    "area_disponible": 387
+  },
+  {
+    "fecha": "2025-06-19T16:50:24.477416",
+    "calibre": "4/0",
+    "cantidad": 3,
+    "factor_ocupacion": 40,
+    "tuberia_recomendada": "2 1/2",
+    "area_requerida": 2300.2499999999995,
+    "area_disponible": 2683
+  }
+]

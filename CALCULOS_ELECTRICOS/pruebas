@@ -1,0 +1,829 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import json
+import os
+from datetime import datetime
+
+class CalculadoraTuberia:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Sistema de Cálculos Eléctricos - NOM-001-SEDE-2012")
+        self.root.geometry("1200x800")
+        self.root.resizable(True, True)
+        self.root.configure(bg='#f5f5f5')
+        
+        # Configurar el estilo
+        self.setup_style()
+        
+        # Tabla 5 – Áreas aproximadas (mm²) de conductores según calibre
+        self.areas_tabla5 = {
+            "14": 18.9, "12": 22.77, "10": 28.19, "8": 53.87,
+            "6": 67.66, "4": 96.66, "2": 112.9, "1/0": 196.1,
+            "2/0": 226.1, "3/0": 262.7, "4/0": 306.7, "250": 405.9,
+            "300": 457.3, "350": 505.1, "400": 556.5, "500": 658.3,
+            "600": 782.9, "700": 874.9, "750": 920.8, "800": 965.5,
+            "900": 1050, "1000": 1134
+        }
+
+        # Tabla 4 – Áreas internas (mm²) de tuberías EMT al 100%
+        self.tuberias_emt = {
+            "1/2": 133, "3/4": 224, "1": 387, "1 1/4": 710,
+            "1 1/2": 987, "2": 1334, "2 1/2": 2683, "3": 3535,
+            "3 1/2": 4563, "4": 5813, "5": 9172, "6": 13849
+        }
+        
+        # Factores de ocupación según NOM-001-SEDE-2012
+        self.factores_ocupacion = {
+            "1 conductor": 53,
+            "2 conductores": 31,
+            "3 o más conductores": 40
+        }
+        
+        # Historial de cálculos
+        self.historial = []
+        
+        self.setup_ui()
+        self.cargar_historial()
+
+    def setup_style(self):
+        """Configurar el estilo de la aplicación"""
+        style = ttk.Style()
+        style.theme_use('clam')
+        
+        # Configurar estilos personalizados
+        style.configure('Header.TFrame', background='#1e3a5f')
+        style.configure('Header.TLabel', background='#1e3a5f', foreground='white', 
+                       font=('Arial', 14, 'bold'))
+        style.configure('SubHeader.TLabel', background='#1e3a5f', foreground='#cccccc', 
+                       font=('Arial', 10))
+        
+        # Botones con colores específicos
+        style.configure('Red.TButton', background='#dc3545', foreground='white', 
+                       font=('Arial', 10, 'bold'))
+        style.configure('Gray.TButton', background='#6c757d', foreground='white', 
+                       font=('Arial', 10))
+        style.configure('Purple.TButton', background='#6f42c1', foreground='white', 
+                       font=('Arial', 10, 'bold'))
+        
+        # Frames con bordes - Configuración corregida
+        style.configure('Custom.TLabelFrame', 
+                       relief='solid', 
+                       borderwidth=2,
+                       background='#f5f5f5')
+        
+    def setup_ui(self):
+        """Configurar la interfaz de usuario"""
+        # ENCABEZADO AZUL MARINO
+        header_frame = tk.Frame(self.root, bg='#1e3a5f', height=80)
+        header_frame.pack(fill=tk.X, padx=0, pady=0)
+        header_frame.pack_propagate(False)
+        
+        # Título principal
+        title_label = tk.Label(header_frame, text="SISTEMA DE CÁLCULOS ELÉCTRICOS", 
+                              bg='#1e3a5f', fg='white', font=('Arial', 18, 'bold'))
+        title_label.pack(pady=(15, 5))
+        
+        # Subtítulo con norma
+        subtitle_label = tk.Label(header_frame, text="Cálculo de Tubería EMT - NOM-001-SEDE-2012", 
+                                 bg='#1e3a5f', fg='#cccccc', font=('Arial', 12))
+        subtitle_label.pack()
+        
+        # CONTENEDOR PRINCIPAL
+        main_container = tk.Frame(self.root, bg='#f5f5f5')
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Configurar grid del contenedor principal (3 columnas)
+        main_container.columnconfigure(0, weight=1, minsize=350)  # Izquierda - Datos normativos
+        main_container.columnconfigure(1, weight=2, minsize=400)  # Centro - Resultados
+        main_container.columnconfigure(2, weight=1, minsize=350)  # Derecha - Datos de entrada
+        main_container.rowconfigure(0, weight=1)
+        
+        # COLUMNA IZQUIERDA - DATOS NORMATIVOS
+        self.setup_left_panel(main_container)
+        
+        # COLUMNA CENTRO - RESULTADOS
+        self.setup_center_panel(main_container)
+        
+        # COLUMNA DERECHA - DATOS DE ENTRADA
+        self.setup_right_panel(main_container)
+        
+        # SECCIÓN INFERIOR - SERVICIOS ADICIONALES
+        self.setup_bottom_panel(main_container)
+
+    def setup_left_panel(self, parent):
+        """Configurar panel izquierdo - Datos normativos"""
+        left_frame = ttk.LabelFrame(parent, text="📚 DATOS NORMATIVOS", 
+                                   style='Custom.TLabelFrame', padding="10")
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 5))
+        left_frame.columnconfigure(0, weight=1)
+        left_frame.rowconfigure(2, weight=1)
+        
+        # Factores de ocupación
+        factor_frame = ttk.LabelFrame(left_frame, text="Factores de Ocupación (%)", padding="5")
+        factor_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        for i, (desc, factor) in enumerate(self.factores_ocupacion.items()):
+            tk.Label(factor_frame, text=f"• {desc}: {factor}%", 
+                    font=('Arial', 9), anchor='w').grid(row=i, column=0, sticky=tk.W, pady=2)
+        
+        # Tabla de calibres (muestra algunos principales)
+        calibre_frame = ttk.LabelFrame(left_frame, text="Áreas de Conductores (mm²)", padding="5")
+        calibre_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        
+        # Headers
+        tk.Label(calibre_frame, text="Calibre", font=('Arial', 9, 'bold'), 
+                bg='#e9ecef').grid(row=0, column=0, sticky=(tk.W, tk.E), padx=2, pady=2)
+        tk.Label(calibre_frame, text="Área (mm²)", font=('Arial', 9, 'bold'), 
+                bg='#e9ecef').grid(row=0, column=1, sticky=(tk.W, tk.E), padx=2, pady=2)
+        
+        # Mostrar algunos calibres principales
+        calibres_principales = ["12", "10", "8", "6", "4", "2", "1/0", "2/0", "3/0", "4/0"]
+        for i, cal in enumerate(calibres_principales, 1):
+            if cal in self.areas_tabla5:
+                tk.Label(calibre_frame, text=cal, font=('Arial', 8)).grid(
+                    row=i, column=0, sticky=tk.W, padx=2, pady=1)
+                tk.Label(calibre_frame, text=f"{self.areas_tabla5[cal]:.2f}", 
+                        font=('Arial', 8)).grid(row=i, column=1, sticky=tk.W, padx=2, pady=1)
+        
+        # Tabla de tuberías
+        tuberia_frame = ttk.LabelFrame(left_frame, text="Tuberías EMT - Áreas Internas", padding="5")
+        tuberia_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        tuberia_frame.columnconfigure(0, weight=1)
+        
+        # Crear scrollable text para tuberías
+        tuberia_text = tk.Text(tuberia_frame, height=10, width=30, font=('Consolas', 8))
+        tuberia_scrollbar = ttk.Scrollbar(tuberia_frame, orient=tk.VERTICAL, command=tuberia_text.yview)
+        tuberia_text.configure(yscrollcommand=tuberia_scrollbar.set)
+        
+        tuberia_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        tuberia_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Llenar datos de tuberías
+        tuberia_text.insert(tk.END, "Diámetro    Área (mm²)\n")
+        tuberia_text.insert(tk.END, "-" * 25 + "\n")
+        for diam, area in self.tuberias_emt.items():
+            tuberia_text.insert(tk.END, f"{diam:8}    {area:6.0f}\n")
+        tuberia_text.config(state=tk.DISABLED)
+
+        def setup_center_panel(self, parent):
+            """Configurar panel central - Resultados"""
+            center_frame = ttk.LabelFrame(parent, text="📊 RESULTADOS DEL CÁLCULO", 
+                                        style='Custom.TLabelFrame', padding="10")
+            center_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=5)
+            center_frame.columnconfigure(0, weight=1)
+            center_frame.rowconfigure(0, weight=1)
+            
+            # Text widget con scrollbar para resultados
+            text_frame = tk.Frame(center_frame)
+            text_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+            text_frame.columnconfigure(0, weight=1)
+            text_frame.rowconfigure(0, weight=1)
+            
+            self.resultado = tk.Text(text_frame, font=('Consolas', 10), wrap=tk.WORD,
+                                    bg='white', relief='sunken', borderwidth=2)
+            self.resultado.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+            
+            result_scrollbar = ttk.Scrollbar(text_frame, orient=tk.VERTICAL, 
+                                            command=self.resultado.yview)
+            result_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+            self.resultado.configure(yscrollcommand=result_scrollbar.set)
+            
+            # Mensaje inicial
+            self.resultado.insert(tk.END, "\n" + "="*60 + "\n")
+            self.resultado.insert(tk.END, "    CALCULADORA DE TUBERÍA EMT\n")
+            self.resultado.insert(tk.END, "    NOM-001-SEDE-2012\n")
+            self.resultado.insert(tk.END, "="*60 + "\n\n")
+            self.resultado.insert(tk.END, "Ingrese los datos en el panel derecho y presione\n")
+            self.resultado.insert(tk.END, "el botón CALCULAR para obtener los resultados.\n\n")
+            self.resultado.insert(tk.END, "Los cálculos se basan en:\n")
+            self.resultado.insert(tk.END, "• Tabla 4: Áreas internas de tuberías EMT\n")
+            self.resultado.insert(tk.END, "• Tabla 5: Áreas de conductores aislados\n")
+            self.resultado.insert(tk.END, "• Factores de ocupación según NOM-001-SEDE-2012\n")
+
+        def setup_right_panel(self, parent):
+            """Configurar panel derecho - Datos de entrada"""
+            right_frame = ttk.LabelFrame(parent, text="⚙️ DATOS DE ENTRADA", 
+                                        style='Custom.TLabelFrame', padding="15")
+            right_frame.grid(row=0, column=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(5, 0))
+            right_frame.columnconfigure(0, weight=1)
+            
+            # Calibre del conductor
+            tk.Label(right_frame, text="Calibre del conductor:", 
+                    font=('Arial', 10, 'bold')).grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+            self.combo_calibre = ttk.Combobox(right_frame, values=list(self.areas_tabla5.keys()), 
+                                            state="readonly", font=('Arial', 10))
+            self.combo_calibre.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+            self.combo_calibre.bind("<<ComboboxSelected>>", self.on_calibre_change)
+            
+            # Información del área individual
+            self.label_area_info = tk.Label(right_frame, text="Área individual: -- mm²", 
+                                        font=('Arial', 9), fg='#0066cc')
+            self.label_area_info.grid(row=2, column=0, sticky=tk.W, pady=(0, 15))
+            
+            # Cantidad de conductores
+            tk.Label(right_frame, text="Cantidad de conductores:", 
+                    font=('Arial', 10, 'bold')).grid(row=3, column=0, sticky=tk.W, pady=(0, 5))
+            self.entry_cantidad = ttk.Entry(right_frame, font=('Arial', 10))
+            self.entry_cantidad.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+            self.entry_cantidad.bind("<KeyRelease>", self.on_cantidad_change)
+            
+            # Factor de ocupación
+            tk.Label(right_frame, text="Factor de ocupación:", 
+                    font=('Arial', 10, 'bold')).grid(row=5, column=0, sticky=tk.W, pady=(0, 5))
+            self.combo_factor = ttk.Combobox(right_frame, values=list(self.factores_ocupacion.keys()), 
+                                            state="readonly", font=('Arial', 10))
+            self.combo_factor.grid(row=6, column=0, sticky=(tk.W, tk.E), pady=(0, 25))
+            self.combo_factor.set("3 o más conductores")
+            
+            # Botones de acción
+            button_frame = tk.Frame(right_frame, bg='#f5f5f5')
+            button_frame.grid(row=7, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
+            button_frame.columnconfigure(0, weight=1)
+            
+            # Botón CALCULAR (Rojo)
+            calc_btn = tk.Button(button_frame, text="CALCULAR", command=self.calcular,
+                                bg='#dc3545', fg='white', font=('Arial', 11, 'bold'),
+                                relief='raised', borderwidth=2, cursor='hand2')
+            calc_btn.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+            calc_btn.bind("<Enter>", lambda e: calc_btn.config(bg='#c82333'))
+            calc_btn.bind("<Leave>", lambda e: calc_btn.config(bg='#dc3545'))
+            
+            # Botón LIMPIAR (Gris)
+            clear_btn = tk.Button(button_frame, text="LIMPIAR", command=self.limpiar,
+                                bg='#6c757d', fg='white', font=('Arial', 10),
+                                relief='raised', borderwidth=2, cursor='hand2')
+            clear_btn.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+            clear_btn.bind("<Enter>", lambda e: clear_btn.config(bg='#545b62'))
+            clear_btn.bind("<Leave>", lambda e: clear_btn.config(bg='#6c757d'))
+            
+            # Espaciador
+            tk.Frame(right_frame, height=20, bg='#f5f5f5').grid(row=8, column=0)
+            
+            # Sección de historial
+            hist_frame = ttk.LabelFrame(right_frame, text="Historial", padding="10")
+            hist_frame.grid(row=9, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+            hist_frame.columnconfigure(0, weight=1)
+            
+            hist_btn = tk.Button(hist_frame, text="Ver Historial", command=self.mostrar_historial,
+                                bg='#17a2b8', fg='white', font=('Arial', 9),
+                                relief='raised', borderwidth=1, cursor='hand2')
+            hist_btn.grid(row=0, column=0, sticky=(tk.W, tk.E))
+
+        def setup_bottom_panel(self, parent):
+            """Configurar panel inferior - Servicios adicionales"""
+            bottom_frame = tk.Frame(parent, bg='#f5f5f5')
+            bottom_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 0))
+            bottom_frame.columnconfigure(1, weight=1)
+            
+            # Servicios adicionales (esquina inferior derecha)
+            services_frame = ttk.LabelFrame(bottom_frame, text="🔧 Servicios Adicionales", padding="10")
+            services_frame.grid(row=0, column=2, sticky=(tk.E), padx=(10, 0))
+            
+            # Botón Memoria Técnica PDF (Morado)
+            pdf_btn = tk.Button(services_frame, text="📄 EXPORTAR PDF", command=self.exportar_pdf,
+                            bg='#6f42c1', fg='white', font=('Arial', 10, 'bold'),
+                            relief='raised', borderwidth=2, cursor='hand2', width=15)
+            pdf_btn.pack(pady=5)
+            pdf_btn.bind("<Enter>", lambda e: pdf_btn.config(bg='#5a32a3'))
+            pdf_btn.bind("<Leave>", lambda e: pdf_btn.config(bg='#6f42c1'))
+            
+            # Barra de estado
+            self.status_var = tk.StringVar()
+            self.status_var.set("Sistema listo para realizar cálculos")
+            status_bar = tk.Label(bottom_frame, textvariable=self.status_var, 
+                                relief=tk.SUNKEN, anchor=tk.W, bg='#e9ecef', 
+                                font=('Arial', 9), padx=10)
+            status_bar.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=(0, 10))
+
+    def on_calibre_change(self, event=None):
+        """Actualizar información cuando cambia el calibre"""
+        calibre = self.combo_calibre.get()
+        if calibre:
+            area = self.areas_tabla5[calibre]
+            self.label_area_info.config(text=f"Área individual: {area:.2f} mm²")
+            self.actualizar_factor_ocupacion()
+
+    def on_cantidad_change(self, event=None):
+        """Actualizar factor de ocupación cuando cambia la cantidad"""
+        self.actualizar_factor_ocupacion()
+
+    def actualizar_factor_ocupacion(self):
+        """Actualizar el factor de ocupación según la cantidad de conductores"""
+        try:
+            cantidad = int(self.entry_cantidad.get()) if self.entry_cantidad.get() else 0
+            if cantidad == 1:
+                self.combo_factor.set("1 conductor")
+            elif cantidad == 2:
+                self.combo_factor.set("2 conductores")
+            elif cantidad >= 3:
+                self.combo_factor.set("3 o más conductores")
+        except ValueError:
+            pass
+
+    def calcular(self):
+        """Realizar el cálculo de tubería"""
+        calibre = self.combo_calibre.get()
+        cantidad_str = self.entry_cantidad.get()
+        factor_key = self.combo_factor.get()
+        
+        # Validaciones
+        if not calibre:
+            messagebox.showerror("Error", "Selecciona un calibre de conductor.")
+            return
+            
+        if not cantidad_str:
+            messagebox.showerror("Error", "Ingresa la cantidad de conductores.")
+            return
+            
+        try:
+            cantidad = int(cantidad_str)
+            if cantidad <= 0:
+                raise ValueError("La cantidad debe ser mayor a 0")
+        except ValueError:
+            messagebox.showerror("Error", "La cantidad de conductores debe ser un número entero positivo.")
+            return
+            
+        if not factor_key:
+            messagebox.showerror("Error", "Selecciona un factor de ocupación.")
+            return
+
+        # Obtener datos
+        area_individual = self.areas_tabla5[calibre]
+        factor_ocupacion = self.factores_ocupacion[factor_key]
+        
+        # Cálculos
+        area_total_conductores = area_individual * cantidad
+        area_interna_requerida = (area_total_conductores * 100) / factor_ocupacion
+        
+        # Buscar tubería recomendada
+        tuberia_recomendada = None
+        area_disponible = None
+        tuberias_posibles = []
+        
+        for tuberia, area in self.tuberias_emt.items():
+            if area >= area_interna_requerida:
+                tuberias_posibles.append((tuberia, area))
+                if tuberia_recomendada is None:
+                    tuberia_recomendada = tuberia
+                    area_disponible = area
+        
+        # Calcular porcentaje de ocupación real
+        porcentaje_ocupacion = (area_total_conductores / area_disponible * 100) if area_disponible else 0
+        
+        # Mostrar resultados
+        self.mostrar_resultados(calibre, cantidad, area_individual, area_total_conductores,
+                               factor_ocupacion, area_interna_requerida, tuberia_recomendada,
+                               area_disponible, porcentaje_ocupacion, tuberias_posibles)
+        
+        # Actualizar estado
+        self.status_var.set(f"Cálculo completado - Tubería recomendada: {tuberia_recomendada or 'No encontrada'}")
+
+    def mostrar_resultados(self, calibre, cantidad, area_individual, area_total_conductores,
+                          factor_ocupacion, area_interna_requerida, tuberia_recomendada,
+                          area_disponible, porcentaje_ocupacion, tuberias_posibles):
+        """Mostrar los resultados del cálculo"""
+        self.resultado.delete("1.0", tk.END)
+        
+        # Encabezado con estilo
+        self.resultado.insert(tk.END, "=" * 70 + "\n")
+        self.resultado.insert(tk.END, "    CALCULADORA DE TUBERÍA EMT - NOM-001-SEDE-2012\n")
+        self.resultado.insert(tk.END, "    " + datetime.now().strftime('%d/%m/%Y %H:%M:%S') + "\n")
+        self.resultado.insert(tk.END, "=" * 70 + "\n\n")
+        
+        # Datos de entrada con formato mejorado
+        self.resultado.insert(tk.END, "📊 DATOS DE ENTRADA:\n")
+        self.resultado.insert(tk.END, f"   ┌─ Calibre del conductor: {calibre} AWG/kcmil\n")
+        self.resultado.insert(tk.END, f"   ├─ Cantidad de conductores: {cantidad}\n")
+        self.resultado.insert(tk.END, f"   ├─ Factor de ocupación: {factor_ocupacion}%\n")
+        self.resultado.insert(tk.END, f"   └─ Área individual: {area_individual:.2f} mm²\n\n")
+        
+        # Cálculos paso a paso
+        self.resultado.insert(tk.END, "🧮 CÁLCULOS REALIZADOS:\n")
+        self.resultado.insert(tk.END, f"   ┌─ Área total conductores:\n")
+        self.resultado.insert(tk.END, f"   │  {area_individual:.2f} mm² × {cantidad} = {area_total_conductores:.2f} mm²\n")
+        self.resultado.insert(tk.END, f"   └─ Área interna requerida:\n")
+        self.resultado.insert(tk.END, f"      ({area_total_conductores:.2f} × 100) ÷ {factor_ocupacion} = {area_interna_requerida:.2f} mm²\n\n")
+        
+        # Resultado principal con formato destacado
+        if tuberia_recomendada:
+            self.resultado.insert(tk.END, "✅ RESULTADO RECOMENDADO:\n")
+            self.resultado.insert(tk.END, "   ╔" + "═" * 40 + "╗\n")
+            self.resultado.insert(tk.END, f"   ║  TUBERÍA EMT: {tuberia_recomendada:15} ║\n")
+            self.resultado.insert(tk.END, f"   ║  Área disponible: {area_disponible:8.0f} mm²  ║\n")
+            self.resultado.insert(tk.END, f"   ║  Ocupación real: {porcentaje_ocupacion:9.1f}%   ║\n")
+            self.resultado.insert(tk.END, "   ╚" + "═" * 40 + "╝\n\n")
+            
+            # Verificación de cumplimiento
+            if porcentaje_ocupacion <= factor_ocupacion:
+                self.resultado.insert(tk.END, "✓ CUMPLE con los requisitos de la norma\n\n")
+            else:
+                self.resultado.insert(tk.END, "⚠ ADVERTENCIA: Excede el factor de ocupación permitido\n\n")
+            
+            # Otras opciones disponibles
+            if len(tuberias_posibles) > 1:
+                self.resultado.insert(tk.END, "📋 ALTERNATIVAS DISPONIBLES:\n")
+                for i, (tuberia, area) in enumerate(tuberias_posibles[1:4], 2):  # Mostrar máximo 3 alternativas
+                    ocupacion = (area_total_conductores / area * 100)
+                    self.resultado.insert(tk.END, f"   {i}. Tubería {tuberia}\" - {area:.0f} mm² (Ocupación: {ocupacion:.1f}%)\n")
+                self.resultado.insert(tk.END, "\n")
+        else:
+            self.resultado.insert(tk.END, "❌ RESULTADO:\n")
+            self.resultado.insert(tk.END, "   ╔" + "═" * 45 + "╗\n")
+            self.resultado.insert(tk.END, "   ║  NO SE ENCONTRÓ TUBERÍA ADECUADA     ║\n")
+            self.resultado.insert(tk.END, f"   ║  Se requieren: {area_interna_requerida:12.2f} mm²     ║\n")
+            self.resultado.insert(tk.END, f"   ║  Máximo disponible: {self.tuberias_emt['6']:8.0f} mm²     ║\n")
+            self.resultado.insert(tk.END, "   ╚" + "═" * 45 + "╝\n\n")
+            self.resultado.insert(tk.END, "💡 RECOMENDACIONES:\n")
+            self.resultado.insert(tk.END, "   • Considere usar múltiples tuberías\n")
+            self.resultado.insert(tk.END, "   • Evalúe el uso de conductores de mayor calibre\n")
+            self.resultado.insert(tk.END, "   • Consulte tuberías de mayor diámetro (conduit rígido)\n\n")
+        
+        # Información normativa
+        self.resultado.insert(tk.END, "📚 BASE NORMATIVA:\n")
+        self.resultado.insert(tk.END, "   • NOM-001-SEDE-2012 - Instalaciones Eléctricas\n")
+        self.resultado.insert(tk.END, "   • Tabla 4: Áreas internas de tuberías EMT\n")
+        self.resultado.insert(tk.END, "   • Tabla 5: Áreas de conductores aislados\n")
+        self.resultado.insert(tk.END, "   • Capítulo 9: Dimensiones de conductores y tuberías\n")
+        
+        # Guardar en historial
+        resultado_dict = {
+            "fecha": datetime.now().isoformat(),
+            "calibre": calibre,
+            "cantidad": cantidad,
+            "factor_ocupacion": factor_ocupacion,
+            "tuberia_recomendada": tuberia_recomendada,
+            "area_requerida": area_interna_requerida,
+            "area_disponible": area_disponible
+        }
+        self.historial.append(resultado_dict)
+
+    def limpiar(self):
+        """Limpiar todos los campos"""
+        self.combo_calibre.set("")
+        self.entry_cantidad.delete(0, tk.END)
+        self.combo_factor.set("3 o más conductores")
+        self.label_area_info.config(text="Área individual: -- mm²")
+        
+        # Mostrar mensaje inicial en resultados
+        self.resultado.delete("1.0", tk.END)
+        self.resultado.insert(tk.END, "\n" + "="*60 + "\n")
+        self.resultado.insert(tk.END, "    CALCULADORA DE TUBERÍA EMT\n")
+        self.resultado.insert(tk.END, "    NOM-001-SEDE-2012\n")
+        self.resultado.insert(tk.END, "="*60 + "\n\n")
+        self.resultado.insert(tk.END, "Ingrese los datos en el panel derecho y presione\n")
+        self.resultado.insert(tk.END, "el botón CALCULAR para obtener los resultados.\n\n")
+        self.resultado.insert(tk.END, "Los cálculos se basan en:\n")
+        self.resultado.insert(tk.END, "• Tabla 4: Áreas internas de tuberías EMT\n")
+        self.resultado.insert(tk.END, "• Tabla 5: Áreas de conductores aislados\n")
+        self.resultado.insert(tk.END, "• Factores de ocupación según NOM-001-SEDE-2012\n")
+        
+        self.status_var.set("Campos limpiados - Sistema listo para nuevo cálculo")
+
+    def guardar_resultado(self):
+        """Guardar el resultado actual en un archivo"""
+        if not self.resultado.get("1.0", tk.END).strip():
+            messagebox.showwarning("Advertencia", "No hay resultados para guardar.")
+            return
+            
+        from tkinter import filedialog
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            title="Guardar resultado"
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(self.resultado.get("1.0", tk.END))
+                messagebox.showinfo("Éxito", f"Resultado guardado en:\n{filename}")
+                self.status_var.set(f"Resultado guardado en {os.path.basename(filename)}")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo guardar el archivo:\n{str(e)}")
+
+    def exportar_pdf(self):
+        """Exportar memoria técnica en PDF"""
+        if not self.resultado.get("1.0", tk.END).strip() or "CALCULADORA DE TUBERÍA EMT" not in self.resultado.get("1.0", "3.0"):
+            messagebox.showwarning("Advertencia", "Primero debe realizar un cálculo para exportar el PDF.")
+            return
+        
+        try:
+            # Importar reportlab para generar PDF
+            from reportlab.lib.pagesizes import letter, A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib import colors
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+            from tkinter import filedialog
+            
+            # Solicitar ubicación del archivo
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".pdf",
+                filetypes=[("Archivos PDF", "*.pdf"), ("Todos los archivos", "*.*")],
+                title="Guardar Memoria Técnica PDF"
+            )
+            
+            if not filename:
+                return
+            
+            # Crear documento PDF
+            doc = SimpleDocTemplate(filename, pagesize=A4, 
+                                  rightMargin=72, leftMargin=72,
+                                  topMargin=72, bottomMargin=18)
+            
+            # Estilos
+            styles = getSampleStyleSheet()
+            
+            # Estilo personalizado para el título
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=16,
+                spaceAfter=30,
+                alignment=TA_CENTER,
+                textColor=colors.HexColor('#1e3a5f')
+            )
+            
+            # Estilo para subtítulos
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Heading2'],
+                fontSize=12,
+                spaceAfter=12,
+                textColor=colors.HexColor('#dc3545')
+            )
+            
+            # Lista para elementos del documento
+            story = []
+            
+            # Título principal
+            story.append(Paragraph("MEMORIA TÉCNICA DE CÁLCULO", title_style))
+            story.append(Paragraph("SISTEMA DE CÁLCULOS ELÉCTRICOS", title_style))
+            story.append(Paragraph("Cálculo de Tubería EMT - NOM-001-SEDE-2012", styles['Normal']))
+            story.append(Spacer(1, 20))
+            
+            # Información del proyecto
+            story.append(Paragraph("INFORMACIÓN DEL CÁLCULO", subtitle_style))
+            
+            # Obtener datos del último cálculo
+            if self.historial:
+                ultimo_calculo = self.historial[-1]
+                fecha_calculo = datetime.fromisoformat(ultimo_calculo['fecha']).strftime('%d/%m/%Y %H:%M:%S')
+                
+                info_data = [
+                    ['Fecha del cálculo:', fecha_calculo],
+                    ['Calibre del conductor:', f"{ultimo_calculo['calibre']} AWG/kcmil"],
+                    ['Cantidad de conductores:', str(ultimo_calculo['cantidad'])],
+                    ['Factor de ocupación:', f"{ultimo_calculo['factor_ocupacion']}%"],
+                    ['Tubería recomendada:', f"{ultimo_calculo['tuberia_recomendada']}\"" if ultimo_calculo['tuberia_recomendada'] else "No encontrada"],
+                    ['Área requerida:', f"{ultimo_calculo['area_requerida']:.2f} mm²"],
+                    ['Área disponible:', f"{ultimo_calculo['area_disponible']:.0f} mm²" if ultimo_calculo['area_disponible'] else "N/A"]
+                ]
+                
+                info_table = Table(info_data, colWidths=[2.5*inch, 3*inch])
+                info_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8f9fa')),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ]))
+                story.append(info_table)
+                story.append(Spacer(1, 20))
+            
+            # Memoria de cálculo
+            story.append(Paragraph("MEMORIA DE CÁLCULO", subtitle_style))
+            
+            # Obtener el contenido de resultados sin los caracteres especiales
+            contenido = self.resultado.get("1.0", tk.END)
+            lineas = contenido.split('\n')
+            
+            # Procesar y limpiar el contenido
+            contenido_limpio = []
+            for linea in lineas:
+                # Remover caracteres especiales de formato
+                linea_limpia = linea.replace('═', '=').replace('║', '|').replace('╔', '+').replace('╗', '+').replace('╚', '+').replace('╝', '+')
+                linea_limpia = linea_limpia.replace('┌', '+').replace('┐', '+').replace('└', '+').replace('┘', '+').replace('├', '+').replace('┤', '+')
+                linea_limpia = linea_limpia.replace('─', '-').replace('┬', '+').replace('┴', '+').replace('┼', '+')
+                if linea_limpia.strip():
+                    contenido_limpio.append(linea_limpia)
+            
+            # Agregar contenido como párrafos
+            for linea in contenido_limpio[:30]:  # Limitar líneas para evitar documentos muy largos
+                if linea.strip():
+                    story.append(Paragraph(linea, styles['Normal']))
+            
+            story.append(Spacer(1, 20))
+            
+            # Base normativa
+            story.append(Paragraph("BASE NORMATIVA", subtitle_style))
+            normativa_text = """
+            Este cálculo se basa en la NOM-001-SEDE-2012 "Instalaciones Eléctricas (utilización)", 
+            específicamente en las tablas de dimensiones de conductores y tuberías del Capítulo 9.
+            
+            Las áreas de conductores corresponden a la Tabla 5 y las áreas internas de tuberías EMT 
+            a la Tabla 4 de dicha norma. Los factores de ocupación se establecen según el número 
+            de conductores instalados en la tubería.
+            """
+            story.append(Paragraph(normativa_text, styles['Normal']))
+            
+            # Construir el PDF
+            doc.build(story)
+            
+            messagebox.showinfo("Éxito", f"Memoria técnica PDF generada:\n{filename}")
+            self.status_var.set(f"PDF exportado: {os.path.basename(filename)}")
+            
+        except ImportError:
+            messagebox.showerror("Error", 
+                               "La librería ReportLab no está instalada.\n" +
+                               "Para instalarla ejecute: pip install reportlab")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo generar el PDF:\n{str(e)}")
+
+    def cargar_historial(self):
+        """Cargar historial desde archivo"""
+        try:
+            if os.path.exists("historial_tuberia.json"):
+                with open("historial_tuberia.json", 'r', encoding='utf-8') as f:
+                    self.historial = json.load(f)
+        except Exception:
+            self.historial = []
+
+    def guardar_historial(self):
+        """Guardar historial en archivo"""
+        try:
+            with open("historial_tuberia.json", 'w', encoding='utf-8') as f:
+                json.dump(self.historial[-50:], f, indent=2, ensure_ascii=False)  # Mantener solo últimos 50
+        except Exception:
+            pass
+
+    def mostrar_historial(self):
+        """Mostrar ventana con historial de cálculos"""
+        if not self.historial:
+            messagebox.showinfo("Historial", "No hay cálculos en el historial.")
+            return
+            
+        historial_window = tk.Toplevel(self.root)
+        historial_window.title("Historial de Cálculos")
+        historial_window.geometry("800x500")
+        historial_window.configure(bg='#f5f5f5')
+        
+        # Configurar el ícono de la ventana (opcional)
+        historial_window.transient(self.root)
+        historial_window.grab_set()
+        
+        # Frame principal
+        main_frame = tk.Frame(historial_window, bg='#f5f5f5', padx=10, pady=10)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Título
+        title_label = tk.Label(main_frame, text="HISTORIAL DE CÁLCULOS", 
+                              font=('Arial', 14, 'bold'), bg='#f5f5f5', fg='#1e3a5f')
+        title_label.pack(pady=(0, 10))
+        
+        # Frame para la tabla
+        table_frame = tk.Frame(main_frame, bg='white', relief='sunken', borderwidth=2)
+        table_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Crear Treeview
+        columns = ("Fecha", "Calibre", "Cantidad", "Factor", "Tubería", "Área Req.")
+        tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=15)
+        
+        # Configurar columnas
+        tree.heading("Fecha", text="Fecha y Hora")
+        tree.heading("Calibre", text="Calibre")
+        tree.heading("Cantidad", text="Cantidad")
+        tree.heading("Factor", text="Factor %")
+        tree.heading("Tubería", text="Tubería Rec.")
+        tree.heading("Área Req.", text="Área Req. (mm²)")
+        
+        tree.column("Fecha", width=140)
+        tree.column("Calibre", width=80)
+        tree.column("Cantidad", width=80)
+        tree.column("Factor", width=80)
+        tree.column("Tubería", width=100)
+        tree.column("Área Req.", width=120)
+        
+        # Scrollbars
+        v_scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=tree.yview)
+        h_scrollbar = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL, command=tree.xview)
+        tree.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+        
+        # Posicionar elementos
+        tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        v_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        h_scrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        
+        table_frame.grid_rowconfigure(0, weight=1)
+        table_frame.grid_columnconfigure(0, weight=1)
+        
+        # Agregar datos (mostrar los más recientes primero)
+        for item in reversed(self.historial[-30:]):  # Mostrar últimos 30
+            fecha = datetime.fromisoformat(item["fecha"]).strftime('%d/%m/%Y %H:%M')
+            tree.insert("", tk.END, values=(
+                fecha,
+                item["calibre"],
+                item["cantidad"],
+                item["factor_ocupacion"],
+                item["tuberia_recomendada"] or "No encontrada",
+                f"{item['area_requerida']:.2f}"
+            ))
+        
+        # Frame de botones
+        button_frame = tk.Frame(main_frame, bg='#f5f5f5')
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        # Botón exportar historial
+        export_btn = tk.Button(button_frame, text="Exportar Historial", 
+                              command=lambda: self.exportar_historial(),
+                              bg='#17a2b8', fg='white', font=('Arial', 10),
+                              relief='raised', borderwidth=2, cursor='hand2')
+        export_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Botón limpiar historial
+        clear_btn = tk.Button(button_frame, text="Limpiar Historial", 
+                             command=lambda: self.limpiar_historial(historial_window),
+                             bg='#dc3545', fg='white', font=('Arial', 10),
+                             relief='raised', borderwidth=2, cursor='hand2')
+        clear_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        # Botón cerrar
+        close_btn = tk.Button(button_frame, text="Cerrar", 
+                             command=historial_window.destroy,
+                             bg='#6c757d', fg='white', font=('Arial', 10),
+                             relief='raised', borderwidth=2, cursor='hand2')
+        close_btn.pack(side=tk.RIGHT)
+
+    def exportar_historial(self):
+        """Exportar historial a archivo CSV"""
+        if not self.historial:
+            messagebox.showwarning("Advertencia", "No hay datos en el historial para exportar.")
+            return
+        
+        from tkinter import filedialog
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("Archivos CSV", "*.csv"), ("Todos los archivos", "*.*")],
+            title="Exportar Historial"
+        )
+        
+        if filename:
+            try:
+                with open(filename, 'w', encoding='utf-8', newline='') as f:
+                    f.write("Fecha,Calibre,Cantidad,Factor_Ocupacion,Tuberia_Recomendada,Area_Requerida,Area_Disponible\n")
+                    for item in self.historial:
+                        fecha = datetime.fromisoformat(item["fecha"]).strftime('%d/%m/%Y %H:%M:%S')
+                        f.write(f"{fecha},{item['calibre']},{item['cantidad']},{item['factor_ocupacion']},")
+                        f.write(f"{item['tuberia_recomendada'] or 'No encontrada'},{item['area_requerida']:.2f},")
+                        f.write(f"{item['area_disponible'] if item['area_disponible'] else 'N/A'}\n")
+                
+                messagebox.showinfo("Éxito", f"Historial exportado a:\n{filename}")
+                self.status_var.set(f"Historial exportado: {os.path.basename(filename)}")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo exportar el historial:\n{str(e)}")
+
+    def limpiar_historial(self, ventana_historial):
+        """Limpiar el historial de cálculos"""
+        respuesta = messagebox.askyesno("Confirmar", 
+                                       "¿Está seguro de que desea limpiar todo el historial?\n" +
+                                       "Esta acción no se puede deshacer.")
+        if respuesta:
+            self.historial = []
+            self.guardar_historial()
+            ventana_historial.destroy()
+            messagebox.showinfo("Éxito", "Historial limpiado correctamente.")
+            self.status_var.set("Historial limpiado")
+
+    def on_closing(self):
+        """Manejar el cierre de la aplicación"""
+        self.guardar_historial()
+        self.root.destroy()
+
+# Ejecutar solo en entorno local (con GUI)
+if __name__ == "__main__":
+    root = tk.Tk()
+    
+    # Configurar ícono de la aplicación (opcional)
+    try:
+        root.iconbitmap('icon.ico')  # Si tienes un archivo de ícono
+    except:
+        pass
+    
+    app = CalculadoraTuberia(root)
+    
+    # Configurar el cierre de la aplicación
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    
+    # Centrar la ventana en la pantalla
+    root.update_idletasks()
+    width = root.winfo_width()
+    height = root.winfo_height()
+    x = (root.winfo_screenwidth() // 2) - (width // 2)
+    y = (root.winfo_screenheight() // 2) - (height // 2)
+    root.geometry(f'{width}x{height}+{x}+{y}')
+    
+    root.mainloop()
