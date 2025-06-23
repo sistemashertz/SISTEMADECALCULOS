@@ -26,6 +26,7 @@ class Calculos:
         
         self.root.configure(bg='#f0f0f0')
         
+
    
         self.ampacidades_cobre_75 = {
             "14": 20, "12": 25, "10": 35, "8": 50, "6": 65,
@@ -802,11 +803,11 @@ class Calculos:
                     formula = f"Transformador: S = {valor} kVA = {potencia_aparente:.0f} VA"
 
                 if tipo_circuito == "monofasico":
-                    corriente = potencia_aparente / voltaje
-                    formula += f"\nI = S / V = {potencia_aparente:.0f} / {voltaje} = {corriente:.2f} A"
-                else:
-                    corriente = potencia_aparente / (math.sqrt(3) * voltaje)
-                    formula += f"\nI = S / (√3 × V) = {potencia_aparente:.0f} / (√3 × {voltaje}) = {corriente:.2f} A"
+                    corriente = potencia_aparente / (voltaje * factor_potencia)
+                    formula += f"\nI = S / (V × cos φ) = {potencia_aparente:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
+                else:  # Trifásico
+                    corriente = potencia_aparente / (math.sqrt(3) * voltaje * factor_potencia)
+                    formula += f"\nI = S / (√3 × V × cos φ) = {potencia_aparente:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
 
             elif unidad in ["W", "kW"]:
                 potencia_activa = valor * (1000 if unidad == "kW" else 1)
@@ -820,15 +821,14 @@ class Calculos:
                 if tipo_circuito == "monofasico":
                     corriente = potencia_activa / (voltaje * factor_potencia)
                     formula += f"\nI = P / (V × cos φ) = {potencia_activa:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
-                else:
+                else:  # Trifásico
                     corriente = potencia_activa / (math.sqrt(3) * voltaje * factor_potencia)
                     formula += f"\nI = P / (√3 × V × cos φ) = {potencia_activa:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
 
-                   
             # ✅ Aplicar 125% si es carga continua (por norma)
             if carga_continua:
-                corriente *= 1.25
-                formula += f"\nCarga continua (NOM-001-SEDE-2012): I × 1.25 = {corriente:.2f} A"
+                corriente_original = corriente
+                formula += f"\nCarga continua (NOM-001-SEDE-2012): I × 1.25 = {corriente_original:.2f} × 1.25 = {corriente:.2f} A"
 
             return corriente, formula
 
@@ -1115,15 +1115,22 @@ class Calculos:
                 z_individual = tabla_impedancias[calibre_recomendado]
                 
             if tipo_circuito == "monofasico":
-                caida_v = (2 * z_individual * corriente * longitud / 1000) / num_conductores
-                formula_caida = f"Monofásico: ΔV = (2 × Z × I × L / 1000) / n"
-                calculo_caida = f"ΔV = (2 × {z_individual} × {corriente:.2f} × {longitud} / 1000) / {num_conductores}"
+                caida_p = (2 * z_individual * corriente * longitud) / (voltaje * 1000)
+                caida_v = (caida_p * voltaje) / 100
+                formula_caida = f"Monofásico: ΔV% = (2 × Z × I × L) / (V × 1000)"
+                calculo_caida = f"ΔV% = (2 × {z_individual} × {corriente:.2f} × {longitud}) / ({voltaje} × 1000)"
             else:
-                caida_v = (math.sqrt(3) * z_individual * corriente * longitud / 1000) / num_conductores
-                formula_caida = f"Trifásico: ΔV = (√3 × Z × I × L / 1000) / n"
-                calculo_caida = f"ΔV = (√3 × {z_individual} × {corriente:.2f} × {longitud} / 1000) / {num_conductores}"
-            
+                caida_p = (math.sqrt(3) * z_individual * corriente * longitud) / (voltaje * 1000)
+                caida_v = (caida_p * voltaje) / 100
+                formula_caida = f"Trifásico: ΔV% = (√3 × Z × I × L) / (V × 1000)"
+                calculo_caida = f"ΔV% = (√3 × {z_individual} × {corriente:.2f} × {longitud}) / ({voltaje} × 1000)"
+
+            # ✅ Esto aplica para ambos casos
             caida_p = (caida_v / voltaje) * 100
+
+
+
+            
             
             mensaje_advertencia = ""
             margen_seguridad = ((ampacidad_calibre - corriente_por_conductor_final) / corriente_por_conductor_final) * 100
