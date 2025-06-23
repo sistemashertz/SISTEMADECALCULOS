@@ -7,7 +7,7 @@ class NOMElectricalInterface:
     def __init__(self, root):
         self.root = root
         self.root.title("NOM-001-SEDE-2012 - Normativa Eléctrica Mexicana")
-        self.root.geometry("1400x900")
+        self.root.geometry("1400x780")
         self.root.configure(bg='#f8fafc')
         
         # Variables de estado
@@ -33,7 +33,7 @@ class NOMElectricalInterface:
         style.configure(
             "Navigation.TButton",
             padding=(15, 10),
-            font=('Segoe UI', 10),
+            font=('Century Gothic', 10),
             borderwidth=1,
             relief="solid"
         )
@@ -237,7 +237,7 @@ class NOMElectricalInterface:
         icon_label = tk.Label(
             left_frame, 
             text="⚡", 
-            font=('Segoe UI', 20),
+            font=('Century Gothic', 20),
             bg='#f59e0b',  # Amarillo/naranja eléctrico
             fg='white',
             width=3,
@@ -252,7 +252,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             title_frame,
             text="NOM-001-SEDE-2012",
-            font=('Segoe UI', 16, 'bold'),
+            font=('Century Gothic', 16, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -261,7 +261,7 @@ class NOMElectricalInterface:
         subtitle_label = tk.Label(
             title_frame,
             text="Normativa Eléctrica Mexicana",
-            font=('Segoe UI', 10),
+            font=('Century Gothic', 10),
             bg='white',
             fg='#6b7280'
         )
@@ -277,7 +277,7 @@ class NOMElectricalInterface:
         
         search_entry = ttk.Entry(
             search_frame,
-            font=('Segoe UI', 10),
+            font=('Century Gothic', 10),
             width=25
         )
         search_entry.pack(side=tk.LEFT)
@@ -309,7 +309,7 @@ class NOMElectricalInterface:
         sidebar_title = tk.Label(
             self.sidebar_frame,
             text="Contenido",
-            font=('Segoe UI', 14, 'bold'),
+            font=('Century Gothic', 14, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -324,7 +324,7 @@ class NOMElectricalInterface:
             btn = tk.Button(
                 btn_frame,
                 text=f"{section['icon']} {section['title']}",
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg='#fef3c7',
                 fg='#92400e',
                 border=1,
@@ -351,7 +351,7 @@ class NOMElectricalInterface:
         compliance_title = tk.Label(
             compliance_frame,
             text="Estado de Cumplimiento",
-            font=('Segoe UI', 10, 'bold'),
+            font=('Century Gothic', 10, 'bold'),
             bg='white',
             fg='#374151'
         )
@@ -361,9 +361,9 @@ class NOMElectricalInterface:
         status_frame = ttk.Frame(compliance_frame)
         status_frame.pack(fill=tk.X, pady=5)
         
-        tk.Label(status_frame, text="✅ Seguridad", bg='white', fg='#059669', font=('Segoe UI', 9)).pack(anchor=tk.W)
-        tk.Label(status_frame, text="⚠️ Caída tensión", bg='white', fg='#d97706', font=('Segoe UI', 9)).pack(anchor=tk.W)
-        tk.Label(status_frame, text="✅ Protecciones", bg='white', fg='#059669', font=('Segoe UI', 9)).pack(anchor=tk.W)
+        tk.Label(status_frame, text="✅ Seguridad", bg='white', fg='#059669', font=('Century Gothic', 9)).pack(anchor=tk.W)
+        tk.Label(status_frame, text="⚠️ Caída tensión", bg='white', fg='#d97706', font=('Century Gothic', 9)).pack(anchor=tk.W)
+        tk.Label(status_frame, text="✅ Protecciones", bg='white', fg='#059669', font=('Century Gothic', 9)).pack(anchor=tk.W)
         
         # Barra de progreso
         progress_frame = ttk.Frame(self.sidebar_frame)
@@ -372,7 +372,7 @@ class NOMElectricalInterface:
         progress_label = tk.Label(
             progress_frame,
             text="Progreso de lectura",
-            font=('Segoe UI', 10, 'bold'),
+            font=('Century Gothic', 10, 'bold'),
             bg='white',
             fg='#374151'
         )
@@ -381,7 +381,7 @@ class NOMElectricalInterface:
         progress_info = tk.Label(
             progress_frame,
             text="4/7",
-            font=('Segoe UI', 9),
+            font=('Century Gothic', 9),
             bg='white',
             fg='#6b7280'
         )
@@ -488,7 +488,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             hero_frame,
             text="NOM-001-SEDE-2012",
-            font=('Segoe UI', 24, 'bold'),
+            font=('Century Gothic', 24, 'bold'),
             bg='#fed7aa',
             fg='#c2410c'
         )
@@ -497,7 +497,7 @@ class NOMElectricalInterface:
         subtitle_label = tk.Label(
             hero_frame,
             text="Normativa Oficial Mexicana - Instalaciones Eléctricas",
-            font=('Segoe UI', 16, 'bold'),
+            font=('Century Gothic', 16, 'bold'),
             bg='#fed7aa',
             fg='#ea580c'
         )
@@ -506,7 +506,7 @@ class NOMElectricalInterface:
         desc_label = tk.Label(
             hero_frame,
             text="Establece las condiciones técnicas mínimas para instalaciones eléctricas seguras en México.\nAplica a sistemas eléctricos en edificaciones habitacionales, comerciales, industriales y del sector público.\nBasada en el National Electrical Code (NEC) con adaptaciones para condiciones mexicanas.",
-            font=('Segoe UI', 11),
+            font=('Century Gothic', 11),
             bg='#fed7aa',
             fg='#7c2d12',
             justify=tk.LEFT
@@ -517,7 +517,7 @@ class NOMElectricalInterface:
         principles_label = tk.Label(
             content_frame,
             text="Principios Fundamentales de Seguridad Eléctrica",
-            font=('Segoe UI', 16, 'bold'),
+            font=('Century Gothic', 16, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -537,7 +537,7 @@ class NOMElectricalInterface:
             title_label = tk.Label(
                 principle_frame,
                 text=principle["title"],
-                font=('Segoe UI', 12, 'bold'),
+                font=('Century Gothic', 12, 'bold'),
                 bg=principle["color"],
                 fg='#1f2937'
             )
@@ -546,7 +546,7 @@ class NOMElectricalInterface:
             desc_label = tk.Label(
                 principle_frame,
                 text=principle["description"],
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg=principle["color"],
                 fg='#374151',
                 wraplength=200,
@@ -557,7 +557,7 @@ class NOMElectricalInterface:
             details_label = tk.Label(
                 principle_frame,
                 text=principle["details"],
-                font=('Segoe UI', 9),
+                font=('Century Gothic', 9),
                 bg=principle["color"],
                 fg='#6b7280',
                 wraplength=200,
@@ -578,7 +578,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             content_frame,
             text="Artículos Clave de la NOM-001-SEDE-2012",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -587,7 +587,7 @@ class NOMElectricalInterface:
         desc_label = tk.Label(
             content_frame,
             text="Artículos más utilizados en cálculos eléctricos y selección de equipos de protección.",
-            font=('Segoe UI', 11),
+            font=('Century Gothic', 11),
             bg='white',
             fg='#6b7280',
             justify=tk.LEFT
@@ -610,7 +610,7 @@ class NOMElectricalInterface:
             article_num = tk.Label(
                 info_frame,
                 text=article["article"],
-                font=('Segoe UI', 12, 'bold'),
+                font=('Century Gothic', 12, 'bold'),
                 bg=article["color"],
                 fg='#1f2937'
             )
@@ -619,7 +619,7 @@ class NOMElectricalInterface:
             article_title = tk.Label(
                 info_frame,
                 text=article["title"],
-                font=('Segoe UI', 11, 'bold'),
+                font=('Century Gothic', 11, 'bold'),
                 bg=article["color"],
                 fg='#374151'
             )
@@ -628,7 +628,7 @@ class NOMElectricalInterface:
             article_desc = tk.Label(
                 info_frame,
                 text=article["description"],
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg=article["color"],
                 fg='#6b7280'
             )
@@ -658,7 +658,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             content_frame,
             text="Fórmulas Eléctricas Fundamentales",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -667,7 +667,7 @@ class NOMElectricalInterface:
         desc_label = tk.Label(
             content_frame,
             text="Fórmulas esenciales para cálculos de corriente, caída de tensión y dimensionamiento de conductores.",
-            font=('Segoe UI', 11),
+            font=('Century Gothic', 11),
             bg='white',
             fg='#6b7280',
             justify=tk.LEFT
@@ -683,7 +683,7 @@ class NOMElectricalInterface:
             name_label = tk.Label(
                 formula_frame,
                 text=formula["name"],
-                font=('Segoe UI', 14, 'bold'),
+                font=('Century Gothic', 14, 'bold'),
                 bg='#f0f9ff',
                 fg='#0c4a6e'
             )
@@ -708,7 +708,7 @@ class NOMElectricalInterface:
             variables_label = tk.Label(
                 formula_frame,
                 text=f"Variables: {formula['variables']}",
-                font=('Segoe UI', 9),
+                font=('Century Gothic', 9),
                 bg='#f0f9ff',
                 fg='#374151',
                 wraplength=700,
@@ -723,7 +723,7 @@ class NOMElectricalInterface:
             example_label = tk.Label(
                 example_frame,
                 text=f"Ejemplo: {formula['example']}",
-                font=('Segoe UI', 9, 'italic'),
+                font=('Century Gothic', 9, 'italic'),
                 bg='#ecfdf5',
                 fg='#059669',
                 wraplength=700,
@@ -742,7 +742,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             content_frame,
             text="Tablas Normativas Principales",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -751,7 +751,7 @@ class NOMElectricalInterface:
         desc_label = tk.Label(
             content_frame,
             text="Tablas más utilizadas para selección de conductores, protecciones y cálculos eléctricos.",
-            font=('Segoe UI', 11),
+            font=('Century Gothic', 11),
             bg='white',
             fg='#6b7280',
             justify=tk.LEFT
@@ -769,7 +769,7 @@ class NOMElectricalInterface:
             table_num = tk.Label(
                 table_frame,
                 text=f"Tabla {table['table']}",
-                font=('Segoe UI', 14, 'bold'),
+                font=('Century Gothic', 14, 'bold'),
                 bg=colors[i % len(colors)],
                 fg='#1f2937'
             )
@@ -779,7 +779,7 @@ class NOMElectricalInterface:
             table_title = tk.Label(
                 table_frame,
                 text=table["title"],
-                font=('Segoe UI', 12, 'bold'),
+                font=('Century Gothic', 12, 'bold'),
                 bg=colors[i % len(colors)],
                 fg='#374151'
             )
@@ -789,7 +789,7 @@ class NOMElectricalInterface:
             table_desc = tk.Label(
                 table_frame,
                 text=table["description"],
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg=colors[i % len(colors)],
                 fg='#6b7280'
             )
@@ -799,7 +799,7 @@ class NOMElectricalInterface:
             usage_label = tk.Label(
                 table_frame,
                 text=f"Uso: {table['usage']}",
-                font=('Segoe UI', 9, 'italic'),
+                font=('Century Gothic', 9, 'italic'),
                 bg=colors[i % len(colors)],
                 fg='#059669'
             )
@@ -813,7 +813,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             content_frame,
             text="Objetivos de la NOM-001-SEDE-2012",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -836,7 +836,7 @@ class NOMElectricalInterface:
             icon_label = tk.Label(
                 obj_frame,
                 text="🛡️",
-                font=('Segoe UI', 20),
+                font=('Century Gothic', 20),
                 bg='#fed7aa',
                 width=3,
                 height=1
@@ -847,7 +847,7 @@ class NOMElectricalInterface:
             obj_label = tk.Label(
                 obj_frame,
                 text=objective,
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg='#fef3c7',
                 fg='#92400e',
                 wraplength=600,
@@ -863,7 +863,7 @@ class NOMElectricalInterface:
         title_label = tk.Label(
             content_frame,
             text="Alcance de la Normativa",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -872,7 +872,7 @@ class NOMElectricalInterface:
         info_text = scrolledtext.ScrolledText(
             content_frame,
             height=15,
-            font=('Segoe UI', 10),
+            font=('Century Gothic', 10),
             wrap=tk.WORD
         )
         info_text.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
@@ -928,7 +928,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
         title_label = tk.Label(
             content_frame,
             text="Implementación en Aplicaciones de Cálculo",
-            font=('Segoe UI', 20, 'bold'),
+            font=('Century Gothic', 20, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -983,7 +983,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             num_label = tk.Label(
                 left_frame,
                 text=str(i + 1),
-                font=('Segoe UI', 12, 'bold'),
+                font=('Century Gothic', 12, 'bold'),
                 bg='#dbeafe',
                 fg='#1d4ed8',
                 width=3,
@@ -994,7 +994,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             icon_label = tk.Label(
                 left_frame,
                 text=step["icon"],
-                font=('Segoe UI', 16),
+                font=('Century Gothic', 16),
                 bg='#f0f9ff'
             )
             icon_label.pack(pady=(5, 0))
@@ -1006,7 +1006,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             step_title = tk.Label(
                 content_step_frame,
                 text=step["step"],
-                font=('Segoe UI', 11, 'bold'),
+                font=('Century Gothic', 11, 'bold'),
                 bg='#f0f9ff',
                 fg='#1f2937'
             )
@@ -1015,7 +1015,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             step_desc = tk.Label(
                 content_step_frame,
                 text=step["desc"],
-                font=('Segoe UI', 9),
+                font=('Century Gothic', 9),
                 bg='#f0f9ff',
                 fg='#6b7280',
                 wraplength=500,
@@ -1032,7 +1032,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
         faq_title = tk.Label(
             faq_frame,
             text="Preguntas Frecuentes - NOM Eléctrica",
-            font=('Segoe UI', 18, 'bold'),
+            font=('Century Gothic', 18, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -1048,7 +1048,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             question_btn = tk.Button(
                 question_frame,
                 text=f"⚡ {faq['question']}",
-                font=('Segoe UI', 10, 'bold'),
+                font=('Century Gothic', 10, 'bold'),
                 bg='#fef3c7',
                 fg='#92400e',
                 border=0,
@@ -1065,7 +1065,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             answer_label = tk.Label(
                 answer_frame,
                 text=faq['answer'],
-                font=('Segoe UI', 10),
+                font=('Century Gothic', 10),
                 bg='white',
                 fg='#374151',
                 wraplength=700,
@@ -1100,7 +1100,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
         title_label = tk.Label(
             calc_window,
             text="🧮 Calculadora de Corriente",
-            font=('Segoe UI', 14, 'bold'),
+            font=('Century Gothic', 14, 'bold'),
             bg='white',
             fg='#1f2937'
         )
@@ -1108,15 +1108,15 @@ CONDICIONES AMBIENTALES MEXICANAS:
         
         # Entradas
         tk.Label(calc_window, text="Potencia (W):", bg='white').pack(anchor=tk.W, padx=50)
-        power_entry = tk.Entry(calc_window, font=('Segoe UI', 10))
+        power_entry = tk.Entry(calc_window, font=('Century Gothic', 10))
         power_entry.pack(pady=5)
         
         tk.Label(calc_window, text="Voltaje (V):", bg='white').pack(anchor=tk.W, padx=50)
-        voltage_entry = tk.Entry(calc_window, font=('Segoe UI', 10))
+        voltage_entry = tk.Entry(calc_window, font=('Century Gothic', 10))
         voltage_entry.pack(pady=5)
         
         tk.Label(calc_window, text="Factor de Potencia:", bg='white').pack(anchor=tk.W, padx=50)
-        fp_entry = tk.Entry(calc_window, font=('Segoe UI', 10))
+        fp_entry = tk.Entry(calc_window, font=('Century Gothic', 10))
         fp_entry.pack(pady=5)
         fp_entry.insert(0, "0.85")
         
@@ -1124,7 +1124,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
         result_label = tk.Label(
             calc_window,
             text="Corriente: -- A",
-            font=('Segoe UI', 12, 'bold'),
+            font=('Century Gothic', 12, 'bold'),
             bg='#f0f9ff',
             fg='#1d4ed8',
             relief="solid",
@@ -1150,7 +1150,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             command=calculate,
             bg='#f59e0b',
             fg='white',
-            font=('Segoe UI', 10, 'bold'),
+            font=('Century Gothic', 10, 'bold'),
             padx=20,
             pady=5
         )
@@ -1173,7 +1173,7 @@ def main():
     # Centrar ventana en pantalla
     root.update_idletasks()
     x = (root.winfo_screenwidth() - root.winfo_width()) // 2
-    y = (root.winfo_screenheight() - root.winfo_height()) // 2
+    y = root.winfo_screenheight() - 860
     root.geometry(f"+{x}+{y}")
     
     root.mainloop()
