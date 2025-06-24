@@ -25,266 +25,8 @@ class Calculos:
         self.font_mono = ('Courier New', 9)
         
         self.root.configure(bg='#f0f0f0')
-
-        self.impedancias = {
-        "1": {
-            "PVC": {
-                "CU": {"R": 0.49, "XL": 0.151, "Z": 0.52},
-                "AL": {"R": 0.520, "XL": 0.151, "Z": 0.79}
-            },
-            "ACERO": {
-                "CU": {"R": 0.520, "XL": 0.151, "Z": 0.79},
-                "AL": {"R": 0.520, "XL": 0.151, "Z": 0.82}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.820, "XL": 0.151, "Z": 0.52},
-                "AL": {"R": 0.850, "XL": 0.151, "Z": 0.52}
-            }
-        },
-        "2": {
-            "PVC": {
-                "CU": {"R": 0.62, "XL": 0.148, "Z": 0.62},
-                "AL": {"R": 0.66, "XL": 0.148, "Z": 0.98}
-            },
-            "ACERO": {
-                "CU": {"R": 0.66, "XL": 0.148, "Z": 0.98},
-                "AL": {"R": 0.66, "XL": 0.148, "Z": 0.98}
-            },
-            "CHAROLA": {
-                "CU": {"R": 1.050, "XL": 0.148, "Z": 0.62},
-                "AL": {"R": 1.050, "XL": 0.148, "Z": 0.66}
-            }
-        },
-        "3": {
-            "PVC": {
-                "CU": {"R": 0.82, "XL": 0.154, "Z": 0.75},
-                "AL": {"R": 0.82, "XL": 0.154, "Z": 1.21}
-            },
-            "ACERO": {
-                "CU": {"R": 0.82, "XL": 0.154, "Z": 1.21},
-                "AL": {"R": 0.82, "XL": 0.154, "Z": 1.21}
-            },
-            "CHAROLA": {
-                "CU": {"R": 1.310, "XL": 0.154, "Z": 0.75},
-                "AL": {"R": 1.350, "XL": 0.154, "Z": 0.79}
-            }
-        },
-        "4": {
-            "PVC": {
-                "CU": {"R": 1.02, "XL": 0.157, "Z": 0.95},
-                "AL": {"R": 1.02, "XL": 0.157, "Z": 1.51}
-            },
-            "ACERO": {
-                "CU": {"R": 1.02, "XL": 0.157, "Z": 1.51},
-                "AL": {"R": 1.02, "XL": 0.157, "Z": 1.51}
-            },
-            "CHAROLA": {
-                "CU": {"R": 1.670, "XL": 0.157, "Z": 0.95},
-                "AL": {"R": 1.670, "XL": 0.157, "Z": 0.98}
-            }
-        },
-        "6": {
-            "PVC": {
-                "CU": {"R": 1.61, "XL": 0.167, "Z": 1.44},
-                "AL": {"R": 1.61, "XL": 0.167, "Z": 2.33}
-            },
-            "ACERO": {
-                "CU": {"R": 1.61, "XL": 0.167, "Z": 2.33},
-                "AL": {"R": 1.61, "XL": 0.167, "Z": 2.36}
-            },
-            "CHAROLA": {
-                "CU": {"R": 2.660, "XL": 0.167, "Z": 1.44},
-                "AL": {"R": 2.660, "XL": 0.167, "Z": 1.48}
-            }
-        },
-        "8": {
-            "PVC": {
-                "CU": {"R": 2.56, "XL": 0.171, "Z": 2.26},
-                "AL": {"R": 2.56, "XL": 0.171, "Z": 0}
-            },
-            "ACERO": {
-                "CU": {"R": 2.56, "XL": 0.171, "Z": 0},
-                "AL": {"R": 2.56, "XL": 0.171, "Z": 0}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0, "XL": 0.171, "Z": 2.26},
-                "AL": {"R": 0, "XL": 0.171, "Z": 2.26}
-            }
-        },
-        "10": {
-            "PVC": {
-                "CU": {"R": 3.90, "XL": 0.164, "Z": 3.6},
-                "AL": {"R": 3.90, "XL": 0.164, "Z": 0}
-            },
-            "ACERO": {
-                "CU": {"R": 3.90, "XL": 0.164, "Z": 0},
-                "AL": {"R": 3.90, "XL": 0.164, "Z": 0}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0, "XL": 0.164, "Z": 3.6},
-                "AL": {"R": 0, "XL": 0.164, "Z": 3.6}
-            }
-        },
-        "12": {
-            "PVC": {
-                "CU": {"R": 6.60, "XL": 0.177, "Z": 5.6},
-                "AL": {"R": 6.60, "XL": 0.177, "Z": 0}
-            },
-            "ACERO": {
-                "CU": {"R": 6.60, "XL": 0.177, "Z": 0},
-                "AL": {"R": 6.60, "XL": 0.177, "Z": 0}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0, "XL": 0.177, "Z": 5.6},
-                "AL": {"R": 0, "XL": 0.177, "Z": 5.6}
-            }
-        },
-        "14": {
-            "PVC": {
-                "CU": {"R": 10.20, "XL": 0.190, "Z": 0.89},
-                "AL": {"R": 10.20, "XL": 0.190, "Z": 0}
-            },
-            "ACERO": {
-                "CU": {"R": 10.20, "XL": 0.190, "Z": 0},
-                "AL": {"R": 10.20, "XL": 0.190, "Z": 0}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0, "XL": 0.190, "Z": 0.89},
-                "AL": {"R": 0, "XL": 0.190, "Z": 0.89}
-            }
-        },
-        "250": {
-            "PVC": {
-                "CU": {"R": 0.171, "XL": 0.135, "Z": 0.217},
-                "AL": {"R": 0.187, "XL": 0.135, "Z": 0.308}
-            },
-            "ACERO": {
-                "CU": {"R": 0.177, "XL": 0.135, "Z": 0.322},
-                "AL": {"R": 0.177, "XL": 0.135, "Z": 0.33}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.279, "XL": 0.135, "Z": 0.217},
-                "AL": {"R": 0.295, "XL": 0.135, "Z": 0.230}
-            }
-        },
-        "300": {
-            "PVC": {
-                "CU": {"R": 0.144, "XL": 0.135, "Z": 0.194},
-                "AL": {"R": 0.161, "XL": 0.135, "Z": 0.269}
-            },
-            "ACERO": {
-                "CU": {"R": 0.148, "XL": 0.135, "Z": 0.282},
-                "AL": {"R": 0.148, "XL": 0.135, "Z": 0.289}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.233, "XL": 0.135, "Z": 0.194},
-                "AL": {"R": 0.249, "XL": 0.135, "Z": 0.207}
-            }
-        },
-        "350": {
-            "PVC": {
-                "CU": {"R": 0.125, "XL": 0.131, "Z": 0.174},
-                "AL": {"R": 0.141, "XL": 0.131, "Z": 0.24}
-            },
-            "ACERO": {
-                "CU": {"R": 0.128, "XL": 0.131, "Z": 0.253},
-                "AL": {"R": 0.128, "XL": 0.131, "Z": 0.262}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.200, "XL": 0.131, "Z": 0.174},
-                "AL": {"R": 0.217, "XL": 0.131, "Z": 0.190}
-            }
-        },
-        "400": {
-            "PVC": {
-                "CU": {"R": 0.108, "XL": 0.131, "Z": 0.161},
-                "AL": {"R": 0.125, "XL": 0.131, "Z": 0.217}
-            },
-            "ACERO": {
-                "CU": {"R": 0.115, "XL": 0.131, "Z": 0.233},
-                "AL": {"R": 0.115, "XL": 0.131, "Z": 0.24}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.177, "XL": 0.131, "Z": 0.161},
-                "AL": {"R": 0.194, "XL": 0.131, "Z": 0.174}
-            }
-        },
-        "500": {
-            "PVC": {
-                "CU": {"R": 0.089, "XL": 0.128, "Z": 0.141},
-                "AL": {"R": 0.105, "XL": 0.128, "Z": 0.187}
-            },
-            "ACERO": {
-                "CU": {"R": 0.095, "XL": 0.128, "Z": 0.2},
-                "AL": {"R": 0.095, "XL": 0.128, "Z": 0.21}
-            },
-            "CHAROLA": {
-                "CU": {"R": 0.141, "XL": 0.128, "Z": 0.141},
-                "AL": {"R": 0.157, "XL": 0.128, "Z": 0.157}
-            }
-        },
-        "1/0": {
-        "PVC": {
-            "CU": {"R": 0.253, "XL": 0.141, "Z": 0.360},
-            "AL": {"R": 0.289, "XL": 0.141, "Z": 0.520}
-        },
-        "ACERO": {
-            "CU": {"R": 0.260, "XL": 0.141, "Z": 0.520},
-            "AL": {"R": 0.260, "XL": 0.141, "Z": 0.520}
-        },
-        "CHAROLA": {
-            "CU": {"R": 0.253, "XL": 0.141, "Z": 0.360},
-            "AL": {"R": 0.289, "XL": 0.141, "Z": 0.520}
-        }
-    },
-
-    "2/0": {
-        "PVC": {
-            "CU": {"R": 0.110, "XL": 0.047, "Z": 0.120},
-            "AL": {"R": 0.196, "XL": 0.047, "Z": 0.203}
-        },
-        "ACERO": {
-            "CU": {"R": 0.110, "XL": 0.047, "Z": 0.129},
-            "AL": {"R": 0.196, "XL": 0.047, "Z": 0.211}
-        },
-        "CHAROLA": {
-            "CU": {"R": 0.253, "XL": 0.047, "Z": 0.120},
-            "AL": {"R": 0.289, "XL": 0.047, "Z": 0.173}
-        }
-    },
-
-    "3/0": {
-        "PVC": {
-            "CU": {"R": 0.084, "XL": 0.046, "Z": 0.096},
-            "AL": {"R": 0.153, "XL": 0.046, "Z": 0.160}
-        },
-        "ACERO": {
-            "CU": {"R": 0.089, "XL": 0.046, "Z": 0.160},
-            "AL": {"R": 0.089, "XL": 0.046, "Z": 0.160}
-        },
-        "CHAROLA": {
-            "CU": {"R": 0.253, "XL": 0.046, "Z": 0.096},
-            "AL": {"R": 0.289, "XL": 0.046, "Z": 0.160}
-        }
-    },
-
-    "4/0": {
-        "PVC": {
-            "CU": {"R": 0.068, "XL": 0.045, "Z": 0.081},
-            "AL": {"R": 0.135, "XL": 0.045, "Z": 0.143}
-        },
-        "ACERO": {
-            "CU": {"R": 0.072, "XL": 0.045, "Z": 0.143},
-            "AL": {"R": 0.072, "XL": 0.045, "Z": 0.143}
-        },
-        "CHAROLA": {
-            "CU": {"R": 0.217, "XL": 0.045, "Z": 0.081},
-            "AL": {"R": 0.243, "XL": 0.045, "Z": 0.143}
-        }
-    }
-
-    }
         
+   
         self.ampacidades_cobre_75 = {
             "14": 20, "12": 25, "10": 35, "8": 50, "6": 65,
             "4": 85, "3": 100, "2": 115, "1": 130,
@@ -656,82 +398,6 @@ class Calculos:
         # Inicializar contenido
         self.actualizar_historial_completo()
         self.mostrar_normativa_inicial()
-
-    def calcular_caida_tension(self, calibre, canalizacion, material, corriente, distancia_m, voltaje, tipo_alimentacion):
-            """
-            Calcula la caída de tensión basada en los parámetros proporcionados usando el diccionario de impedancias
-            """
-            try:
-                # Mapear canalizacion a formato del diccionario
-                canalizacion_map = {
-                    "PVC": "PVC",
-                    "Acero": "ACERO", 
-                    "Charola": "CHAROLA"
-                }
-
-                # Mapear material a formato del diccionario
-                material_map = {
-                    "cobre": "CU",
-                    "aluminio": "AL"
-                }
-
-                canalizacion_key = canalizacion_map.get(canalizacion, "PVC")
-                material_key = material_map.get(material.lower(), "CU")  # <- asegúrate de que sea minúscula
-
-                # DEBUG
-                print(f"[DEBUG] Buscando impedancia para: calibre={calibre}, canalización={canalizacion_key}, material={material_key}")
-
-                if calibre not in self.impedancias:
-                    print(f"[ERROR] Calibre '{calibre}' no encontrado en impedancias.")
-                    return None
-                if canalizacion_key not in self.impedancias[calibre]:
-                    print(f"[ERROR] Canalización '{canalizacion_key}' no disponible para calibre {calibre}.")
-                    return None
-                if material_key not in self.impedancias[calibre][canalizacion_key]:
-                    print(f"[ERROR] Material '{material_key}' no disponible para canalización {canalizacion_key} y calibre {calibre}.")
-                    return None
-
-                datos = self.impedancias[calibre][canalizacion_key][material_key]
-                R = datos["R"]
-                XL = datos["XL"]
-                Z = datos["Z"]
-
-                # Si Z es 0, calcularlo usando R y XL
-                if Z == 0:
-                    Z = math.sqrt(R**2 + XL**2)
-
-                L = distancia_m / 1000  # m a km
-                I = corriente
-                V = voltaje
-
-                if tipo_alimentacion.upper() == "TRIFASICO":
-                    caida_v = math.sqrt(3) * I * L * Z
-                elif tipo_alimentacion.upper() == "MONOFASICO":
-                    caida_v = 2 * I * L * Z
-                else:
-                    print("[ERROR] Tipo de alimentación no reconocido.")
-                    return None
-
-                delta_v_porcentaje = (caida_v / V) * 100
-
-                return {
-                    "caida_porcentual": round(delta_v_porcentaje, 2),
-                    "caida_voltios": round(caida_v, 3),
-                    "cumple": delta_v_porcentaje <= 3,
-                    "datos_impedancia": datos,
-                    "parametros": {
-                        "R": R,
-                        "XL": XL,
-                        "Z": Z,
-                        "L": L,
-                        "I": I,
-                        "V": V
-                    }
-                }
-
-            except Exception as e:
-                print(f"[ERROR] Excepción inesperada en calcular_caida_tension: {e}")
-                return None
 
     def setup_formulario_principal(self, parent):
         # Crear un Canvas y Scrollbar para el formulario
@@ -1136,11 +802,11 @@ class Calculos:
                     formula = f"Transformador: S = {valor} kVA = {potencia_aparente:.0f} VA"
 
                 if tipo_circuito == "monofasico":
-                    corriente = potencia_aparente / (voltaje * factor_potencia)
-                    formula += f"\nI = S / (V × cos φ) = {potencia_aparente:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
-                else:  # Trifásico
-                    corriente = potencia_aparente / (math.sqrt(3) * voltaje * factor_potencia)
-                    formula += f"\nI = S / (√3 × V × cos φ) = {potencia_aparente:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
+                    corriente = potencia_aparente / voltaje
+                    formula += f"\nI = S / V = {potencia_aparente:.0f} / {voltaje} = {corriente:.2f} A"
+                else:
+                    corriente = potencia_aparente / (math.sqrt(3) * voltaje)
+                    formula += f"\nI = S / (√3 × V) = {potencia_aparente:.0f} / (√3 × {voltaje}) = {corriente:.2f} A"
 
             elif unidad in ["W", "kW"]:
                 potencia_activa = valor * (1000 if unidad == "kW" else 1)
@@ -1154,14 +820,15 @@ class Calculos:
                 if tipo_circuito == "monofasico":
                     corriente = potencia_activa / (voltaje * factor_potencia)
                     formula += f"\nI = P / (V × cos φ) = {potencia_activa:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
-                else:  # Trifásico
+                else:
                     corriente = potencia_activa / (math.sqrt(3) * voltaje * factor_potencia)
                     formula += f"\nI = P / (√3 × V × cos φ) = {potencia_activa:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
 
+                   
             # ✅ Aplicar 125% si es carga continua (por norma)
             if carga_continua:
-                corriente_original = corriente
-                formula += f"\nCarga continua (NOM-001-SEDE-2012): I × 1.25 = {corriente_original:.2f} × 1.25 = {corriente:.2f} A"
+                corriente *= 1.25
+                formula += f"\nCarga continua (NOM-001-SEDE-2012): I × 1.25 = {corriente:.2f} A"
 
             return corriente, formula
 
@@ -1347,12 +1014,12 @@ class Calculos:
             num_conductores = int(self.num_conductores_var.get())
             canalizacion = self.canalizacion_var.get()
             temp_conductor = self.temperatura_conductor_var.get()
-
+            
             if not all([valor_potencia, self.voltaje_var.get(), 
                     self.longitud_var.get(), self.num_conductores_var.get()]):
                 messagebox.showerror("Error", "Por favor, complete todos los campos.")
                 return
-
+            
             if unidad_potencia not in ["A", "kVAR"]:
                 factor_potencia = float(self.fp_var.get()) if self.fp_var.get() else 0.9
                 if not (0.1 <= factor_potencia <= 1.0):
@@ -1360,20 +1027,40 @@ class Calculos:
                     return
             else:
                 factor_potencia = 1.0
-
+            
             corriente, formula_corriente = self.calcular_corriente_por_equipo(
                 tipo_equipo, valor_potencia, unidad_potencia, voltaje, tipo_circuito, factor_potencia
             )
-
-            corriente_para_proteccion = corriente * {
-                "Motor": 1.25, "Transformador": 1.25, "Capacitor": 1.35,
-                "Generador": 1.15
-            }.get(tipo_equipo, 1.25)
-
+            
+            es_corriente_directa = unidad_potencia == "A"
+            
+            # PASO 1: Calcular factor normativo para protección
+            if tipo_equipo == "Motor":
+                factor_proteccion = 1.25
+                factor_aplicado_texto = "1.25 (Art. 430-22 NOM - OBLIGATORIO para motores)"
+            elif tipo_equipo == "Transformador":
+                factor_proteccion = 1.25
+                factor_aplicado_texto = "1.25 (Art. 450-3 NOM - OBLIGATORIO para transformadores)"
+            elif tipo_equipo == "Capacitor":
+                factor_proteccion = 1.35
+                factor_aplicado_texto = "1.35 (Art. 460-8 NOM - OBLIGATORIO para capacitores)"
+            elif tipo_equipo == "Generador":
+                factor_proteccion = 1.15
+                factor_aplicado_texto = "1.15 (Art. 445-5 NOM - OBLIGATORIO para generadores)"
+            else:
+                factor_proteccion = 1.25
+                factor_aplicado_texto = "1.25 (OBLIGATORIO para cargas generales)"
+            
+            corriente_para_proteccion = corriente * factor_proteccion
+            
+            # PASO 2: Seleccionar interruptor basado en corriente con factor
             interruptor_info = self.seleccionar_interruptor(corriente, tipo_equipo, corriente_para_proteccion)
+            
+            # PASO 3: Usar corriente del interruptor para calcular calibre (SIN volver a aplicar factor)
             corriente_interruptor = interruptor_info['capacidad']
             corriente_por_conductor_final = corriente_interruptor / num_conductores
-
+            
+            # PASO 4: Seleccionar calibre basado en corriente del interruptor
             calibre_recomendado, ampacidad_calibre, corriente_por_conductor, _, factor_aplicado, fuente_tabla = self.recomendar_calibre(
                 corriente=corriente_interruptor,
                 material=material,
@@ -1383,36 +1070,64 @@ class Calculos:
                 tipo_equipo=tipo_equipo,
                 es_corriente_interruptor=True
             )
-            self.calibre_recomendado = calibre_recomendado
 
-            # ✅ Calcular caída de tensión correctamente usando la función central
-            resultado_caida = self.calcular_caida_tension(
-                calibre_recomendado,
-                canalizacion,
-                material,
-                corriente,
-                longitud,
-                voltaje,
-                tipo_circuito
-            )
-
-            if resultado_caida is None:
-                messagebox.showerror("Error", "No se pudo calcular la caída de tensión.")
-                return
-
-            caida_p = resultado_caida["caida_porcentual"]
-            caida_v = resultado_caida["caida_voltios"]
-            z_individual = resultado_caida["parametros"]["Z"]
-            formula_caida = "Desde función calcular_caida_tension()"
-            calculo_caida = ""
-
-            calibre_tierra = self.seleccionar_tierra_fisica(interruptor_info['capacidad'])
-            self.actualizar_tipo_instalacion_info(tipo_equipo, tipo_circuito, tipo_carga, canalizacion)
+            self.calibre_recomendado = calibre_recomendado  # <- Para usarlo en calcular_tuberia()
 
             es_charola = self.es_instalacion_charola()
+            
+            if es_charola:
+                if material == "cobre":
+                    tabla_impedancias = self.impedancia_charola_cobre
+                    tipo_instalacion = "Charola Portacables (Tabla 310-15(b)(20))"
+                else:
+                    tabla_impedancias = self.impedancia_charola_aluminio
+                    tipo_instalacion = "Charola Portacables (Tabla 310-15(b)(20))"
+                
+                if calibre_recomendado not in tabla_impedancias:
+                    messagebox.showerror("Error", f"Calibre {calibre_recomendado} no disponible para charola en Tabla 310-15(b)(20).")
+                    return
+                
+                z_individual = tabla_impedancias[calibre_recomendado]
+            else:
+                canalizacion_clave = canalizacion
+                if canalizacion not in ["PVC", "Acero"]:
+                    canalizacion_clave = "PVC"
+                    
+                if material == "cobre":
+                    if canalizacion_clave in self.impedancia_cobre:
+                        tabla_impedancias = self.impedancia_cobre[canalizacion_clave]
+                        tipo_instalacion = f"Conduit {canalizacion_clave} (Tabla 310-15(b)(16))"
+                    else:
+                        messagebox.showerror("Error", f"Tipo de canalización '{canalizacion_clave}' no encontrado para cobre.")
+                        return
+                else:
+                    if canalizacion_clave in self.impedancia_aluminio:
+                        tabla_impedancias = self.impedancia_aluminio[canalizacion_clave]
+                        tipo_instalacion = f"Conduit {canalizacion_clave} (Tabla 310-15(b)(16))"
+                    else:
+                        messagebox.showerror("Error", f"Tipo de canalización '{canalizacion_clave}' no encontrado para aluminio.")
+                        return
+                
+                if calibre_recomendado not in tabla_impedancias:
+                    messagebox.showerror("Error", f"Calibre {calibre_recomendado} no encontrado para {material.capitalize()} en {canalizacion_clave}.")
+                    return
+                
+                z_individual = tabla_impedancias[calibre_recomendado]
+                
+            if tipo_circuito == "monofasico":
+                caida_v = (2 * z_individual * corriente * longitud / 1000) / num_conductores
+                formula_caida = f"Monofásico: ΔV = (2 × Z × I × L / 1000) / n"
+                calculo_caida = f"ΔV = (2 × {z_individual} × {corriente:.2f} × {longitud} / 1000) / {num_conductores}"
+            else:
+                caida_v = (math.sqrt(3) * z_individual * corriente * longitud / 1000) / num_conductores
+                formula_caida = f"Trifásico: ΔV = (√3 × Z × I × L / 1000) / n"
+                calculo_caida = f"ΔV = (√3 × {z_individual} × {corriente:.2f} × {longitud} / 1000) / {num_conductores}"
+            
+            caida_p = (caida_v / voltaje) * 100
+            
             mensaje_advertencia = ""
             margen_seguridad = ((ampacidad_calibre - corriente_por_conductor_final) / corriente_por_conductor_final) * 100
-
+            
             if corriente_por_conductor_final > ampacidad_calibre:
                 mensaje_advertencia = "❌ ERROR CRÍTICO: El calibre es INSUFICIENTE para la corriente requerida"
             elif margen_seguridad < 5:
@@ -1421,24 +1136,25 @@ class Calculos:
                 mensaje_advertencia = "⚠️ PRECAUCIÓN: Margen de seguridad mínimo"
             else:
                 mensaje_advertencia = f"✅ CORRECTO: Margen de seguridad del {margen_seguridad:.1f}%"
-
-            self.mostrar_resultados_completos(
-                caida_p, caida_v, tipo_carga, valor_potencia, unidad_potencia,
-                corriente, corriente_para_proteccion, voltaje, calibre_recomendado,
-                material, longitud, num_conductores, canalizacion, tipo_circuito, z_individual,
-                factor_potencia, tipo_equipo, formula_corriente,
-                formula_caida, calculo_caida, ampacidad_calibre,
-                corriente_por_conductor_final, mensaje_advertencia, temp_conductor,
-                unidad_potencia == "A", factor_aplicado, interruptor_info, fuente_tabla,
-                tipo_instalacion=f"CHAROLA" if es_charola else f"CONDUIT {canalizacion.upper()}",
-                es_charola=es_charola, calibre_tierra=calibre_tierra
-            )
-
+            
+            # Calcular calibre de tierra física y mostrar resultados
+            calibre_tierra = self.seleccionar_tierra_fisica(interruptor_info['capacidad'])
+            
+            # Actualizar labels de tipo de carga e instalación
+            self.actualizar_tipo_instalacion_info(tipo_equipo, tipo_circuito, tipo_carga, canalizacion)
+            
+            self.mostrar_resultados_completos(caida_p, caida_v, tipo_carga, valor_potencia, unidad_potencia,
+                                    corriente, corriente_para_proteccion, voltaje, calibre_recomendado, 
+                                    material, longitud, num_conductores, canalizacion, tipo_circuito, z_individual, 
+                                    factor_potencia, tipo_equipo, formula_corriente, 
+                                    formula_caida, calculo_caida, ampacidad_calibre,
+                                    corriente_por_conductor_final, mensaje_advertencia, temp_conductor, 
+                                    es_corriente_directa, factor_aplicado_texto, interruptor_info, fuente_tabla, tipo_instalacion, es_charola, calibre_tierra)
+            
         except ValueError as e:
             messagebox.showerror("Error", f"Error en valores ingresados: {str(e)}")
         except Exception as e:
             messagebox.showerror("Error", f"Error en el cálculo: {str(e)}")
-
 
     def actualizar_tipo_instalacion_info(self, tipo_equipo, tipo_circuito, tipo_carga, canalizacion):
         """Actualiza la información de tipo de carga e instalación."""
