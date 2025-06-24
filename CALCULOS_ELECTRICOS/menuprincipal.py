@@ -22,8 +22,6 @@ class Config:
         'separator': '#E0E0E0'
     }
 
-
-#Comentario de subir
     FONTS = {
         'title': ('Century Gothic', 20, 'bold'),
         'subtitle': ('Century Gothic', 18, 'bold'),
@@ -43,11 +41,7 @@ class Config:
 
 
 class MenuPrincipal:
-    """Ventana principal del sistema. Contiene el menú y delega a otras
-    pantallas. Se ha actualizado para que cada módulo (por ejemplo
-    `calculosint`) se abra en una ventana hija (`tk.Toplevel`) mientras la
-    ventana principal se oculta con `withdraw()`. Al cerrar la ventana hija
-    el menú vuelve a mostrarse con `deiconify()`."""
+    """Ventana principal del sistema con funcionalidad de administrador"""
 
     def __init__(self, master: tk.Tk):
         self.master = master
@@ -60,10 +54,16 @@ class MenuPrincipal:
         if not self.verificar_dependencias():
             return
         
+        # Variables del usuario (se asignan desde LoginVentana)
+        self.usuario_logueado = None
+        self.datos_usuario = None
+        self.is_admin = False
+        
         # Variables para las imágenes
         self.fondo_image = None
         self.logo_image = None
         self.icon_user = None
+        self.admin_icon = None
         
         # Configurar ventana
         self.configurar_ventana()
@@ -136,7 +136,7 @@ class MenuPrincipal:
         self.master.geometry(f"{width}x{height}+{x}+{y}")
 
     def cargar_imagenes(self):
-        """Carga las imágenes del logo y del fondo usando rutas relativas"""
+        """Carga las imágenes incluyendo el icono de administrador"""
         base_path = os.path.dirname(os.path.abspath(__file__))
         images_path = os.path.join(base_path, "Imagenes")
         
@@ -150,7 +150,6 @@ class MenuPrincipal:
             fondo_path = os.path.join(images_path, Config.IMAGES['fondo'])
             if os.path.exists(fondo_path):
                 imagen_fondo = Image.open(fondo_path)
-                # Ajustar tamaño según la ventana actual
                 window_size = (self.master.winfo_width(), self.master.winfo_height())
                 imagen_fondo = imagen_fondo.resize(window_size, Image.Resampling.LANCZOS)
                 self.fondo_image = ImageTk.PhotoImage(imagen_fondo)
@@ -188,6 +187,47 @@ class MenuPrincipal:
         except Exception as e:
             self.logger.error(f"Error al cargar icono de usuario: {e}")
             self.icon_user = None
+
+        # NUEVO: Cargar icono de administrador
+        try:
+            admin_icon_path = os.path.join(images_path, "admin_icon.png")
+            if os.path.exists(admin_icon_path):
+                imagen_admin = Image.open(admin_icon_path)
+                imagen_admin.thumbnail((32, 32), Image.Resampling.LANCZOS)
+                self.admin_icon = ImageTk.PhotoImage(imagen_admin)
+                self.logger.info("Icono de administrador cargado correctamente")
+            else:
+                # Crear icono simple si no existe
+                self.crear_icono_admin_simple(admin_icon_path)
+                imagen_admin = Image.open(admin_icon_path)
+                imagen_admin.thumbnail((32, 32), Image.Resampling.LANCZOS)
+                self.admin_icon = ImageTk.PhotoImage(imagen_admin)
+        except Exception as e:
+            self.logger.error(f"Error al cargar icono de admin: {e}")
+            self.admin_icon = None
+
+    def crear_icono_admin_simple(self, path):
+        """Crea un icono simple de administrador si no existe"""
+        try:
+            from PIL import Image, ImageDraw
+            
+            # Crear imagen 32x32 con un ícono de usuario + engranaje
+            img = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(img)
+            
+            # Dibujar usuario
+            draw.ellipse([6, 2, 18, 14], fill='#E85A2B', outline='#D44B22', width=2)  # Cabeza
+            draw.ellipse([2, 12, 22, 28], fill='#E85A2B', outline='#D44B22', width=2)  # Cuerpo
+            
+            # Dibujar engranaje pequeño (símbolo de admin)
+            draw.ellipse([20, 20, 30, 30], fill='#4A4A4A', outline='#2C2C2C', width=1)
+            draw.ellipse([23, 23, 27, 27], fill='white')
+            
+            img.save(path, "PNG")
+            self.logger.info(f"Icono de admin creado en: {path}")
+            
+        except Exception as e:
+            self.logger.error(f"Error al crear icono de admin: {e}")
 
     def configurar_estilos(self):
         """Estilos de botones Hertz"""
@@ -270,13 +310,13 @@ class MenuPrincipal:
         self.crear_footer(parent)
 
     def crear_header(self, parent):
-        """Crea el header con logo Hertz"""
+        """Crea el header con logo Hertz y botón de admin si corresponde"""
         header_frame = tk.Frame(parent, bg=Config.COLORS['white'], height=90)
         header_frame.pack(fill='x', padx=20, pady=(15, 0))
         header_frame.pack_propagate(False)
         
+        # Logo Hertz (lado izquierdo)
         if self.logo_image:
-            # Logo Hertz
             logo_label = tk.Label(header_frame, image=self.logo_image, bg=Config.COLORS['white'])
             logo_label.pack(side='left', pady=5)
         else:
@@ -299,8 +339,40 @@ class MenuPrincipal:
                 bg=Config.COLORS['white'], 
                 fg=Config.COLORS['primary']
             ).pack(anchor='w')
+
+        # NUEVO: Sección del usuario logueado (centro)
+        if self.usuario_logueado:
+            user_info_frame = tk.Frame(header_frame, bg=Config.COLORS['white'])
+            user_info_frame.pack(side='left', expand=True, padx=20)
+            
+            # Información del usuario
+            welcome_text = f"Bienvenido: {self.usuario_logueado}"
+            if self.datos_usuario and self.datos_usuario.get('nombre'):
+                welcome_text = f"Bienvenido: {self.datos_usuario['nombre']}"
+            
+            tk.Label(
+                user_info_frame,
+                text=welcome_text,
+                font=Config.FONTS['text_small'],
+                bg=Config.COLORS['white'],
+                fg=Config.COLORS['text_primary']
+            ).pack(anchor='center')
+            
+            # Mostrar rol
+            rol_display = "Administrador" if self.is_admin else "Usuario"
+            tk.Label(
+                user_info_frame,
+                text=f"Rol: {rol_display}",
+                font=Config.FONTS['text_tiny'],
+                bg=Config.COLORS['white'],
+                fg=Config.COLORS['text_secondary']
+            ).pack(anchor='center')
+
+        # NUEVO: Botón de administrador (solo visible para admin)
+        if self.is_admin:
+            self.crear_boton_admin(header_frame)
         
-        # Información de la norma (alineada a la derecha)
+        # Información de la norma (lado derecho)
         info_frame = tk.Frame(header_frame, bg=Config.COLORS['white'])
         info_frame.pack(side='right', pady=15)
         
@@ -319,6 +391,110 @@ class MenuPrincipal:
             bg=Config.COLORS['white'], 
             fg=Config.COLORS['text_secondary']
         ).pack(anchor='e')
+
+    def crear_boton_admin(self, parent):
+        """Crea el botón de administrador"""
+        try:
+            admin_frame = tk.Frame(parent, bg=Config.COLORS['white'])
+            admin_frame.pack(side='right', padx=(0, 20))
+            
+            # Botón con icono
+            if self.admin_icon:
+                admin_btn = tk.Label(
+                    admin_frame,
+                    image=self.admin_icon,
+                    bg=Config.COLORS['white'],
+                    cursor="hand2",
+                    relief="flat",
+                    borderwidth=0
+                )
+            else:
+                # Botón de texto si no hay icono
+                admin_btn = tk.Label(
+                    admin_frame,
+                    text="👤+",
+                    font=Config.FONTS['text'],
+                    bg=Config.COLORS['white'],
+                    fg=Config.COLORS['primary'],
+                    cursor="hand2",
+                    relief="flat",
+                    borderwidth=1,
+                    padx=8,
+                    pady=4
+                )
+            
+            admin_btn.pack()
+            
+            # Efectos hover
+            def on_enter(e):
+                admin_btn.config(bg="#F0F0F0")
+            
+            def on_leave(e):
+                admin_btn.config(bg=Config.COLORS['white'])
+            
+            def on_click(e):
+                self.abrir_dialogo_admin()
+            
+            admin_btn.bind("<Enter>", on_enter)
+            admin_btn.bind("<Leave>", on_leave)
+            admin_btn.bind("<Button-1>", on_click)
+            
+            # Tooltip
+            self.crear_tooltip(admin_btn, "Agregar nuevo usuario")
+            
+            # Etiqueta descriptiva
+            tk.Label(
+                admin_frame,
+                text="Agregar Usuario",
+                font=Config.FONTS['text_tiny'],
+                bg=Config.COLORS['white'],
+                fg=Config.COLORS['text_light']
+            ).pack(pady=(2, 0))
+            
+            self.logger.info("Botón de administrador creado")
+            
+        except Exception as e:
+            self.logger.error(f"Error al crear botón admin: {e}")
+
+    def crear_tooltip(self, widget, text):
+        """Crea un tooltip para el widget"""
+        def mostrar_tooltip(event):
+            tooltip = tk.Toplevel()
+            tooltip.wm_overrideredirect(True)
+            tooltip.wm_geometry(f"+{event.x_root+10}+{event.y_root+10}")
+            tooltip.configure(bg="#FFFFE0")
+            
+            label = tk.Label(
+                tooltip, 
+                text=text, 
+                background="#FFFFE0", 
+                relief="solid", 
+                borderwidth=1,
+                font=Config.FONTS['text_tiny'],
+                padx=8,
+                pady=4
+            )
+            label.pack()
+            
+            # Auto-ocultar después de 3 segundos
+            tooltip.after(3000, tooltip.destroy)
+        
+        widget.bind("<Enter>", mostrar_tooltip)
+
+    def abrir_dialogo_admin(self):
+        """Abre el diálogo para agregar un nuevo usuario"""
+        try:
+            # Importar aquí para evitar dependencias circulares
+            from login import RegistroVentana
+            
+            # Crear la ventana de registro
+            RegistroVentana(self.master)
+            
+            self.logger.info("Diálogo de registro de usuario abierto")
+            
+        except Exception as e:
+            self.logger.error(f"Error al abrir diálogo de admin: {e}")
+            messagebox.showerror("Error", f"No se pudo abrir el diálogo de registro:\n{e}")
 
     def crear_titulo_principal(self, parent):
         """Crea el título principal"""
@@ -456,6 +632,8 @@ class MenuPrincipal:
                 del self.logo_image
             if hasattr(self, 'icon_user') and self.icon_user:
                 del self.icon_user
+            if hasattr(self, 'admin_icon') and self.admin_icon:
+                del self.admin_icon
             self.logger.info("Recursos limpiados correctamente")
         except Exception as e:
             self.logger.error(f"Error al limpiar recursos: {e}")
@@ -654,6 +832,32 @@ class MenuPrincipal:
             messagebox.showerror("Error", f"Error al abrir la ventana de información: {str(e)}")
             if hasattr(self, 'master'):
                 self.master.deiconify()
+
+    def actualizar_interfaz_usuario(self):
+        """Actualiza la interfaz después de recibir los datos del usuario"""
+        print(f"🔧 Actualizando interfaz. is_admin = {self.is_admin}")
+        
+        # Encontrar el frame principal y recrear su contenido
+        canvas_items = self.canvas.find_all()
+        
+        for item in canvas_items:
+            if self.canvas.type(item) == "window":
+                try:
+                    window_widget_name = self.canvas.itemcget(item, "window")
+                    if window_widget_name:
+                        main_frame = self.master.nametowidget(window_widget_name)
+                        
+                        # Limpiar contenido actual
+                        for child in main_frame.winfo_children():
+                            child.destroy()
+                        
+                        # Recrear contenido con datos del usuario
+                        self.crear_contenido(main_frame)
+                        print(f"✅ Interfaz actualizada. Botón admin debería aparecer: {self.is_admin}")
+                        break
+                except Exception as e:
+                    print(f"Error al actualizar interfaz: {e}")
+                    continue
 
     def __del__(self):
         """Destructor para limpiar recursos"""
