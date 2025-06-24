@@ -416,6 +416,8 @@ class CharolaCalculatorPro:
             return
         
         calibre = self.calibre_var.get()
+        self.calibre_resultante = calibre
+
         
         configuracion = {
             'incluye_fases': self.incluye_fases.get(),
@@ -428,6 +430,7 @@ class CharolaCalculatorPro:
         
         try:
             resultado = self.realizar_calculo(calibre, configuracion)
+            
             self.mostrar_resultados(calibre, configuracion, resultado)
             self.agregar_historial(calibre, configuracion, resultado)
         except Exception as e:
@@ -679,38 +682,15 @@ Hertz Ingeniería & Servicios Eléctricos S.A de C.V
         self.colorear_texto("ESPECIFICACIONES", "info")
 
 
-def main():
-    root = tk.Tk()
+def lanzar_charola_en_ventana(datos_precargados=None):
+    ventana = tk.Toplevel()
+    app = CharolaCalculatorPro(ventana)
     
-    # Configurar icono de la ventana (opcional)
-    try:
-        # Si tienes un archivo .ico puedes usarlo así:
-        # root.iconbitmap('icono.ico')
-        pass
-    except:
-        pass
-    
-    # Centrar ventana en la pantalla
-    window_width = 1450
-    window_height = 700
-    
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    
-    center_x = int(screen_width/2 - window_width/2)
-    center_y = int(screen_height/2 - window_height/2)
-    
-    root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-    
-    # Crear la aplicación
-    app = CharolaCalculatorPro(root)
-    
-    # Configurar el protocolo de cierre
-    root.protocol("WM_DELETE_WINDOW", app.cerrar_aplicacion)
-    
-    # Iniciar la aplicación
-    root.mainloop()
+    # Precargar el calibre si se pasó como parámetro
+    if datos_precargados and "calibre" in datos_precargados:
+        app.calibre_var.set(datos_precargados["calibre"])
+
+    ventana.protocol("WM_DELETE_WINDOW", app.cerrar_aplicacion)
+    ventana.mainloop()
 
 
-if __name__ == "__main__":
-    main()

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import math
 from datetime import datetime
+from charola import lanzar_charola_en_ventana
 
 class Calculos:
     def __init__(self, root):
@@ -586,10 +587,11 @@ class Calculos:
                                     cursor='hand2')
         calcular_tuberia_btn.pack(side='left', fill='x', expand=True, padx=(0, 2))
         
-        calcular_charola_btn = tk.Button(tertiary_buttons, text="📐 Charola", 
-                                    command=self.calcular_charola, font=self.font_normal,
-                                    bg='#f39c12', fg='white', relief='raised', bd=2,
-                                    cursor='hand2')
+        calcular_charola_btn = tk.Button(tertiary_buttons, text="🔧 CHAROLA",
+                            font=("Century Gothic", 11, "bold"),
+                            bg="#198754", fg="white",
+                            width=10, height=2,
+                            command=self.calcular_charola)
         calcular_charola_btn.pack(side='left', fill='x', expand=True, padx=2)
         
        
@@ -1581,29 +1583,18 @@ class Calculos:
 
         
     def calcular_charola(self):
-        self.canalizacion_var.set("Charola")
-        self.actualizar_info_canalizacion()
-        
-        info_msg = """CÁLCULO PARA CHAROLA PORTACABLES - METODOLOGÍA MEJORADA
-        
-CONFIGURACIÓN AUTOMÁTICA:
-• Tabla aplicada: 310-15(b)(20)
-• Instalación: Charola portacables
-• Conductores: Sostenidos por mensajero
-• Máximo: 3 conductores por fase
+        try:
+            # Usa el calibre ya calculado
+            calibre = self.calibre_recomendado
+            lanzar_charola_en_ventana({"calibre": calibre})
+        except AttributeError:
+            messagebox.showerror("Error", "⚠️ Primero realiza un cálculo para obtener el calibre.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo abrir la interfaz de charola:\n{str(e)}")
 
-NUEVA METODOLOGÍA NORMATIVA:
-1. Corriente nominal del equipo
-2. Factor de seguridad normativo
-3. Selección de interruptor comercial
-4. Calibre basado en corriente del interruptor
-5. SIN duplicar factores de seguridad
 
-Presione 'CALCULAR' para experimentar la metodología mejorada."""
-        
-        messagebox.showinfo("Configuración para Charola", info_msg)
 
-    def exportar_a_pdf(self):
+    def exportar_a_pdf(self):   
         try:
             # Verificar que hay cálculos
             if not self.historial:

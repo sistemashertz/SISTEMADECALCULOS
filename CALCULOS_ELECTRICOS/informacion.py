@@ -2,11 +2,14 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import math
 from tkinter import font
+import os
+import subprocess
+import sys
 
 class NOMElectricalInterface:
     def __init__(self, root):
         self.root = root
-        self.root.title("NOM-001-SEDE-2012 - Normativa Eléctrica Mexicana")
+        self.root.title("Sistema de Cálculos Eléctricos - NOM-001-SEDE-2012")
         self.root.geometry("1400x780")
         self.root.configure(bg='#f8fafc')
         
@@ -21,8 +24,117 @@ class NOMElectricalInterface:
         # Datos de la aplicación
         self.setup_electrical_data()
         
-        # Crear la interfaz
+        # Crear barra de menú PRIMERO
+        self.create_menubar()
+        
+        # Crear header corporativo
+        self.create_corporate_header()
+        
+        # Crear la interfaz principal
         self.create_interface()
+
+    def create_menubar(self):
+        """Crear barra de menú superior"""
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        # Menú Archivo
+        menu_archivo = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Archivo", menu=menu_archivo)
+        menu_archivo.add_command(label="Nueva consulta", command=self.nueva_consulta)
+        menu_archivo.add_command(label="Abrir NOM-001-SEDE-2012", command=self.download_nom)
+        menu_archivo.add_command(label="Exportar información...")
+        menu_archivo.add_separator()
+        menu_archivo.add_command(label="Configuraciones...")
+        menu_archivo.add_separator()
+        menu_archivo.add_command(label="Salir", command=self.root.destroy)
+
+        # Menú Herramientas
+        menu_herramientas = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Herramientas", menu=menu_herramientas)
+        menu_herramientas.add_command(label="🧮 Calculadora de Corriente", command=self.abrir_calculosint)
+        menu_herramientas.add_command(label="📐 Calculadora de Caída de Tensión")
+        menu_herramientas.add_command(label="🔌 Calculadora de Conductores")
+        menu_herramientas.add_command(label="🏗️ Calculadora de Tuberías")
+        menu_herramientas.add_separator()
+        menu_herramientas.add_command(label="📊 Tablas Normativas")
+        menu_herramientas.add_command(label="📋 Generador de Reportes")
+
+        # Menú Ayuda
+        menu_ayuda = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Ayuda", menu=menu_ayuda)
+        menu_ayuda.add_command(label="📖 Manual de usuario")
+        menu_ayuda.add_command(label="📚 Guía de la NOM-001-SEDE-2012")
+        menu_ayuda.add_command(label="🎓 Tutoriales de cálculo")
+        menu_ayuda.add_separator()
+        menu_ayuda.add_command(label="📞 Contacto técnico")
+        menu_ayuda.add_command(label="🏢 Acerca de Hertz Ingeniería...")
+
+    def create_corporate_header(self):
+        """Crear header corporativo con logo"""
+        header_frame = tk.Frame(self.root, bg="#2c3e50", height=80)
+        header_frame.pack(fill=tk.X, pady=0)
+        header_frame.pack_propagate(False)
+
+        # Frame interno para organizar logo y textos
+        header_content = tk.Frame(header_frame, bg="#2c3e50")
+        header_content.pack(fill=tk.BOTH, expand=True)
+
+        # Frame para logo (lado izquierdo)
+        logo_frame = tk.Frame(header_content, bg="#2c3e50", width=250)
+        logo_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(15, 20))
+        logo_frame.pack_propagate(False)
+
+        # Cargar logo (si existe)
+        try:
+            # Cargar el logo desde la carpeta Imagenes
+            logo_original = tk.PhotoImage(file="Imagenes/logo.png")
+            
+            # Redimensionar el logo para que se ajuste mejor al header
+            original_width = logo_original.width()
+            original_height = logo_original.height()
+            
+            # Establecer altura máxima de 50px manteniendo proporción
+            max_height = 50
+            if original_height > max_height:
+                subsample_factor = max(1, int(original_height / max_height))
+                self.logo_image = logo_original.subsample(subsample_factor, subsample_factor)
+            else:
+                self.logo_image = logo_original
+            
+            logo_label = tk.Label(logo_frame, image=self.logo_image, bg="#2c3e50")
+            logo_label.pack(side=tk.LEFT, padx=(10, 0), pady=15)
+        except Exception as e:
+            # Si no existe el logo, mostrar placeholder
+            logo_placeholder = tk.Label(logo_frame, text="HERTZ\nIngeniería & Servicios\nEléctricos", 
+                                      bg="#34495e", fg="white", 
+                                      font=("Century Gothic", 8, "bold"),
+                                      justify=tk.CENTER, 
+                                      width=25, height=3)
+            logo_placeholder.pack(side=tk.LEFT, padx=(10, 0), pady=15)
+
+        # Frame para textos (centro)
+        text_frame = tk.Frame(header_content, bg="#2c3e50")
+        text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Título principal
+        titulo_principal = tk.Label(text_frame, text="SISTEMA DE CÁLCULOS ELÉCTRICOS", 
+                                  bg="#2c3e50", fg="white", 
+                                  font=("Century Gothic", 16, "bold"))
+        titulo_principal.pack(pady=(15, 5))
+
+        # Subtítulo
+        subtitulo = tk.Label(text_frame, text="NOM-001-SEDE-2012 • Hertz Ingeniería & Servicios Eléctricos S.A de C.V", 
+                           bg="#2c3e50", fg="#bdc3c7", 
+                           font=("Century Gothic", 10))
+        subtitulo.pack()
+
+    def nueva_consulta(self):
+        """Reiniciar la aplicación a la vista inicial"""
+        self.active_section.set("overview")
+        self.progress_value.set(50)
+        self.update_active_button()
+        self.update_content()
 
     def setup_styles(self):
         """Configurar estilos personalizados para tema eléctrico"""
@@ -209,8 +321,8 @@ class NOMElectricalInterface:
 
     def create_interface(self):
         """Crear la interfaz principal"""
-        # Header
-        self.create_header()
+        # Header de búsqueda y controles
+        self.create_search_header()
         
         # Container principal
         main_container = ttk.Frame(self.root)
@@ -220,87 +332,50 @@ class NOMElectricalInterface:
         self.create_sidebar(main_container)
         self.create_main_content(main_container)
 
-    def create_header(self):
-        """Crear el header de la aplicación"""
-        header_frame = ttk.Frame(self.root, style="Header.TFrame")
-        header_frame.pack(fill=tk.X, padx=0, pady=0)
+    def create_search_header(self):
+        """Crear el header de búsqueda y controles"""
+        search_frame = ttk.Frame(self.root, style="Header.TFrame")
+        search_frame.pack(fill=tk.X, padx=0, pady=(0, 10))
         
         # Container del header
-        header_container = ttk.Frame(header_frame)
-        header_container.pack(fill=tk.X, padx=20, pady=15)
-        
-        # Logo y título (lado izquierdo)
-        left_frame = ttk.Frame(header_container)
-        left_frame.pack(side=tk.LEFT, fill=tk.Y)
-        
-        # Icono eléctrico
-        icon_label = tk.Label(
-            left_frame, 
-            text="⚡", 
-            font=('Century Gothic', 20),
-            bg='#f59e0b',  # Amarillo/naranja eléctrico
-            fg='white',
-            width=3,
-            height=1
-        )
-        icon_label.pack(side=tk.LEFT, padx=(0, 15))
-        
-        # Títulos
-        title_frame = ttk.Frame(left_frame)
-        title_frame.pack(side=tk.LEFT, fill=tk.Y)
-        
-        title_label = tk.Label(
-            title_frame,
-            text="NOM-001-SEDE-2012",
-            font=('Century Gothic', 16, 'bold'),
-            bg='white',
-            fg='#1f2937'
-        )
-        title_label.pack(anchor=tk.W)
-        
-        subtitle_label = tk.Label(
-            title_frame,
-            text="Normativa Eléctrica Mexicana",
-            font=('Century Gothic', 10),
-            bg='white',
-            fg='#6b7280'
-        )
-        subtitle_label.pack(anchor=tk.W)
+        search_container = ttk.Frame(search_frame)
+        search_container.pack(fill=tk.X, padx=20, pady=15)
         
         # Controles (lado derecho)
-        right_frame = ttk.Frame(header_container)
+        right_frame = ttk.Frame(search_container)
         right_frame.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Campo de búsqueda
-        search_frame = ttk.Frame(right_frame)
-        search_frame.pack(side=tk.LEFT, padx=(0, 15))
+        search_input_frame = ttk.Frame(right_frame)
+        search_input_frame.pack(side=tk.LEFT, padx=(0, 15))
         
         search_entry = ttk.Entry(
-            search_frame,
+            search_input_frame,
             font=('Century Gothic', 10),
             width=25
         )
         search_entry.pack(side=tk.LEFT)
-        search_entry.insert(0, "Buscar artículo o tabla...")
+        search_entry.insert(0, "🔍 Buscar en NOM...")
         
         # Botón calculadora
         calc_btn = ttk.Button(
             right_frame,
-            text="🧮 Calculadora",
-            command=self.open_calculator
+            text="🧮 CÁLCULOS",
+            width=22,
+            command=self.abrir_calculosint
         )
         calc_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Botón de descarga
-        download_btn = ttk.Button(
+
+        # Botón abrir NOM
+        nom_btn = ttk.Button(
             right_frame,
-            text="📥 Descargar NOM",
+            text="📥 ABRIR NOM",
+            width=22,
             command=self.download_nom
         )
-        download_btn.pack(side=tk.LEFT)
+        nom_btn.pack(side=tk.LEFT)
 
     def create_sidebar(self, parent):
-        """Crear el sidebar de navegación"""
         self.sidebar_frame = ttk.Frame(parent, style="Card.TFrame")
         self.sidebar_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 20))
         self.sidebar_frame.configure(width=300)
@@ -1157,20 +1232,24 @@ CONDICIONES AMBIENTALES MEXICANAS:
         calc_btn.pack(pady=10)
 
     def download_nom(self):
-        """Simular descarga de NOM"""
-        messagebox.showinfo(
-            "Descarga NOM-001-SEDE-2012",
-            "La descarga de la Norma Oficial Mexicana NOM-001-SEDE-2012 comenzará en breve.\n\n"
-            "Incluye: Texto completo, tablas normativas y ejemplos de aplicación.\n\n"
-            "Nota: Esta es una simulación para efectos de demostración."
-        )
+        try:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+            pdf_path = os.path.join(base_path, "NOM-001-SEDE-2012 .pdf")
+            os.startfile(pdf_path)
+        except Exception as e:
+            messagebox.showerror("Error al abrir el PDF", f"No se pudo abrir el archivo PDF.\n\nError: {str(e)}")
 
+    def abrir_calculosint(self):
+        try:
+            subprocess.Popen([sys.executable, "calculosint.py"])
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo abrir calculosint.py:\n{e}")
 
 # Función principal para ejecutar la aplicación
 def main():
     root = tk.Tk()
     app = NOMElectricalInterface(root)
-    
+
     # Centrar ventana en pantalla
     root.update_idletasks()
     x = (root.winfo_screenwidth() - root.winfo_width()) // 2

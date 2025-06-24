@@ -9,6 +9,98 @@ class TuberiaCalculo:
         self.root.geometry("1400x800")
         self.root.configure(bg="#f0f0f0")
 
+        # ------------------ BARRA DE MENÚ ------------------
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        # Menú Archivo
+        menu_archivo = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Archivo", menu=menu_archivo)
+        menu_archivo.add_command(label="Nuevo cálculo", command=self.limpiar)
+        menu_archivo.add_command(label="Guardar resultados...")
+        menu_archivo.add_command(label="Exportar PDF...")
+        menu_archivo.add_separator()
+        menu_archivo.add_command(label="Salir", command=self.root.destroy)
+
+        # Menú Herramientas
+        menu_herramientas = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Herramientas", menu=menu_herramientas)
+        menu_herramientas.add_command(label="Calculadora de Corriente")
+        menu_herramientas.add_command(label="Calculadora de Caída de Tensión")
+        menu_herramientas.add_command(label="Calculadora de Conductores")
+        menu_herramientas.add_separator()
+        menu_herramientas.add_command(label="Configuraciones...")
+
+        # Menú Ayuda
+        menu_ayuda = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Ayuda", menu=menu_ayuda)
+        menu_ayuda.add_command(label="Manual de usuario")
+        menu_ayuda.add_command(label="Normas aplicables")
+        menu_ayuda.add_command(label="Contacto técnico")
+        menu_ayuda.add_separator()
+        menu_ayuda.add_command(label="Acerca de...")
+
+        # ------------------ HEADER CORPORATIVO ------------------
+        header_frame = tk.Frame(self.root, bg="#2c3e50", height=80)
+        header_frame.pack(fill=tk.X, pady=0)
+        header_frame.pack_propagate(False)
+
+        # Frame interno para organizar logo y textos
+        header_content = tk.Frame(header_frame, bg="#2c3e50")
+        header_content.pack(fill=tk.BOTH, expand=True)
+
+        # Frame para logo (lado izquierdo)
+        logo_frame = tk.Frame(header_content, bg="#2c3e50", width=250)
+        logo_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(15, 20))
+        logo_frame.pack_propagate(False)
+
+        # Cargar logo (si existe)
+        try:
+            # Cargar el logo desde la carpeta Imagenes
+            logo_original = tk.PhotoImage(file="Imagenes/logo.png")
+            
+            # Redimensionar el logo para que se ajuste mejor al header
+            # El logo completo necesita más espacio horizontal
+            original_width = logo_original.width()
+            original_height = logo_original.height()
+            
+            # Establecer altura máxima de 50px manteniendo proporción
+            max_height = 50
+            if original_height > max_height:
+                scale_factor = max_height / original_height
+                # Usar subsample para redimensionar (valores enteros)
+                subsample_factor = max(1, int(original_height / max_height))
+                self.logo_image = logo_original.subsample(subsample_factor, subsample_factor)
+            else:
+                self.logo_image = logo_original
+            
+            logo_label = tk.Label(logo_frame, image=self.logo_image, bg="#2c3e50")
+            logo_label.pack(side=tk.LEFT, padx=(10, 0), pady=15)
+        except Exception as e:
+            # Si no existe el logo, mostrar placeholder
+            logo_placeholder = tk.Label(logo_frame, text="HERTZ\nIngeniería & Servicios\nEléctricos", 
+                                      bg="#34495e", fg="white", 
+                                      font=("Century Gothic", 8, "bold"),
+                                      justify=tk.CENTER, 
+                                      width=25, height=3)
+            logo_placeholder.pack(side=tk.LEFT, padx=(10, 0), pady=15)
+
+        # Frame para textos (centro)
+        text_frame = tk.Frame(header_content, bg="#2c3e50")
+        text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Título principal
+        titulo_principal = tk.Label(text_frame, text="SISTEMA DE CÁLCULOS ELÉCTRICOS", 
+                                  bg="#2c3e50", fg="white", 
+                                  font=("Century Gothic", 16, "bold"))
+        titulo_principal.pack(pady=(15, 5))
+
+        # Subtítulo
+        subtitulo = tk.Label(text_frame, text="NOM-001-SEDE-2012 • Hertz Ingeniería & Servicios Eléctricos S.A de C.V", 
+                           bg="#2c3e50", fg="#bdc3c7", 
+                           font=("Century Gothic", 10))
+        subtitulo.pack()
+
         # Precargar datos si vienen desde calculosint.py
         if datos_precargados:
             calibre = datos_precargados.get("calibre", "")
@@ -18,16 +110,6 @@ class TuberiaCalculo:
             calibre = ""
             cantidad = ""
             aislamiento = ""
-
-        # ------------------ ENCABEZADO ------------------
-        header = tk.Frame(self.root, bg="#1d3557", height=60)
-        header.pack(fill=tk.X)
-
-        tk.Label(header, text="SISTEMA DE CÁLCULOS ELÉCTRICOS",
-                 bg="#1d3557", fg="white", font=("Century Gothic", 16, "bold")).pack(pady=5)
-
-        tk.Label(header, text="NOM-001-SEDE-2012 • Hertz Ingeniería & Servicios Eléctricos S.A de C.V",
-                 bg="#1d3557", fg="white", font=("Century Gothic", 10)).pack()
 
         # ------------------ CONTENIDO PRINCIPAL ------------------
         main_frame = tk.Frame(self.root, bg="#f0f0f0")
@@ -243,6 +325,58 @@ class TuberiaCalculo:
         tk.Button(servicios, text="📊 Reporte Detallado", bg="#adb5bd", fg="black",
                   font=("Century Gothic", 10, "bold")).pack(side=tk.LEFT, padx=5, pady=5)
 
+        # Mostrar mensaje de bienvenida al inicializar
+        self.mostrar_bienvenida_tuberia()
+
+    def mostrar_bienvenida_tuberia(self):
+        """Mostrar mensaje de bienvenida en el área de resultados"""
+        bienvenida = """╔══════════════════════════════════════════════════════════════════════════════╗
+║                    🏢 HERTZ INGENIERÍA & SERVICIOS ELÉCTRICOS                ║
+║                           CALCULADORA DE TUBERÍAS ELÉCTRICAS                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🎯 BIENVENIDO AL SISTEMA DE CÁLCULO DE TUBERÍAS EMT
+
+Esta herramienta te permite calcular el diámetro interior mínimo de tuberías 
+eléctricas según la NOM-001-SEDE-2012, utilizando el criterio del 40% de llenado 
+cuando hay más de dos conductores.
+
+📋 INSTRUCCIONES DE USO:
+
+1️⃣ Selecciona el calibre y cantidad de CONDUCTORES DE FASE
+2️⃣ Indica si se utilizará CONDUCTOR NEUTRO y su calibre
+3️⃣ Selecciona el calibre del CONDUCTOR DE TIERRA
+4️⃣ Define el tipo de AISLAMIENTO de los conductores
+5️⃣ Presiona el botón "🧮 CALCULAR"
+6️⃣ Consulta el diámetro mínimo de la tubería y sugerencias comerciales
+
+⚡ CARACTERÍSTICAS DEL SISTEMA:
+
+✅ Cálculos basados en Tablas 4 y 5 de la NOM-001-SEDE-2012
+✅ Factor de llenado del 40% conforme a Art. 300.17
+✅ Comparación contra diámetros de tuberías EMT comerciales
+✅ Exportación de resultados a PDF
+✅ Referencias normativas visibles en todo momento
+
+🔧 ESPECIFICACIONES TÉCNICAS PREDEFINIDAS:
+
+• Factor de llenado: 40% (más de 2 conductores)
+• Temperatura ambiente: 30 °C
+• Material del conductor: Cobre (Cu)
+• Instalación: Tubería EMT
+
+📞 SOPORTE TÉCNICO:
+
+Para dudas o sugerencias, contacta al área de ingeniería de:
+Hertz Ingeniería & Servicios Eléctricos S.A. de C.V
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                      ¡INGRESA LOS DATOS Y COMIENZA TU CÁLCULO! 👇
+"""
+        self.resultado.delete(1.0, tk.END)
+        self.resultado.insert(tk.END, bienvenida)
+
     def calcular(self):
         try:
             # Validar datos de entrada
@@ -372,14 +506,15 @@ class TuberiaCalculo:
             messagebox.showerror("Error", f"Error inesperado: {str(e)}")
 
     def limpiar(self):
-        """Limpiar todos los campos de entrada y el resultado"""
+        """Limpiar todos los campos de entrada y mostrar mensaje de bienvenida"""
         self.combo_fase.set("")
         self.entry_fases.delete(0, tk.END)
         self.combo_neutro_si_no.set("No")
         self.combo_neutro.set("")
         self.combo_tierra.set("")
         self.combo_aislamiento.set("")
-        self.resultado.delete("1.0", tk.END)
+        # Mostrar de nuevo el mensaje de bienvenida al limpiar
+        self.mostrar_bienvenida_tuberia()
 
     def mostrar(self):
         """Mostrar la ventana principal"""
