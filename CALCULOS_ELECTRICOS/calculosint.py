@@ -759,7 +759,7 @@ class Calculos:
         else:
             self.fp_entry.config(state='normal')
 
-    def calcular_corriente_por_equipo(self, tipo_equipo, valor, unidad, voltaje, tipo_circuito, factor_potencia,carga_continua = True ):
+    def calcular_corriente_por_equipo(self, tipo_equipo, valor, unidad, voltaje, tipo_circuito, factor_potencia, carga_continua=True, conductor_material="Cobre", tipo_instalacion="Conduit", temperatura=75, conductores_por_fase=1, longitud_m=10):
         if unidad == "A":
             return float(valor), f"Corriente ingresada directamente: {valor} A"
         
@@ -859,6 +859,182 @@ class Calculos:
                 return float(valor), f"Corriente ingresada directamente: {valor} A"
             else:
                 raise ValueError("Para capacitores use únicamente kVAR o A como unidad")
+        def calcular_corriente_por_equipo(self, tipo_equipo, valor, unidad, voltaje, tipo_circuito, factor_potencia, carga_continua=True, conductor_material="Cobre", tipo_instalacion="Conduit", temperatura=75):
+            if unidad == "A":
+                return float(valor), f"Corriente ingresada directamente: {valor} A"
+            
+            eficiencia = float(self.eficiencia_var.get()) if hasattr(self, 'eficiencia_var') else 0.90
+            valor = float(valor)
+            
+            # Aplicar factor de demanda para alimentadores
+            factor_demanda = self.obtener_factor_demanda()
+        
+        if tipo_equipo == "Motor":
+            if unidad == "HP":
+                potencia_mecanica = valor * 746
+                potencia_electrica = potencia_mecanica / eficiencia
+                formula = f"Motor: P_eléctrica = (HP × 746) / η = ({valor} × 746) / {eficiencia} = {potencia_electrica:.0f} W"
+            elif unidad in ["W", "kW"]:
+                potencia_electrica = valor * (1000 if unidad == "kW" else 1)
+                formula = f"Motor: P_eléctrica = {valor} {unidad} = {potencia_electrica:.0f} W"
+            
+            # Aplicar factor de demanda si es alimentador
+            if factor_demanda < 1.0:
+                potencia_electrica *= factor_demanda
+                formula += f"\nFactor de demanda aplicado: {factor_demanda} (Alimentador)"
+                formula += f"\nP_demanda = {potencia_electrica:.0f} W"
+            
+            if tipo_circuito == "monofasico":
+                corriente = potencia_electrica / (voltaje * factor_potencia)
+                formula += f"\nI = P / (V × cos φ) = {potencia_electrica:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
+            else:
+                corriente = potencia_electrica / (math.sqrt(3) * voltaje * factor_potencia)
+                formula += f"\nI = P / (√3 × V × cos φ) = {potencia_electrica:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
+            
+            return corriente, formula
+            
+        elif tipo_equipo == "Transformador":
+            if unidad == "kVA":
+                potencia_aparente = valor * 1000  # Convertir kVA a VA
+
+                if factor_demanda < 1.0:
+                    potencia_aparente *= factor_demanda
+                    formula = f"Transformador: S = {valor} kVA × {factor_demanda} (Factor demanda) = {potencia_aparente:.0f} VA"
+                else:
+                    formula = f"Transformador: S = {valor} kVA = {potencia_aparente:.0f} VA"
+
+                if tipo_circuito == "monofasico":
+                    corriente = potencia_aparente / voltaje
+                    formula += f"\nI = S / V = {potencia_aparente:.0f} / {voltaje} = {corriente:.2f} A"
+                else:
+                    corriente = potencia_aparente / (math.sqrt(3) * voltaje)
+                    formula += f"\nI = S / (√3 × V) = {potencia_aparente:.0f} / (√3 × {voltaje}) = {corriente:.2f} A"
+
+            elif unidad in ["W", "kW"]:
+                potencia_activa = valor * (1000 if unidad == "kW" else 1)
+
+                if factor_demanda < 1.0:
+                    potencia_activa *= factor_demanda
+                    formula = f"Transformador: P = {valor} {unidad} × {factor_demanda} (Factor demanda) = {potencia_activa:.0f} W"
+                else:
+                    formula = f"Transformador: P = {valor} {unidad} = {potencia_activa:.0f} W"
+
+                if tipo_circuito == "monofasico":
+                    corriente = potencia_activa / (voltaje * factor_potencia)
+                    formula += f"\nI = P / (V × cos φ) = {potencia_activa:.0f} / ({voltaje} × {factor_potencia}) = {corriente:.2f} A"
+                else:
+                    corriente = potencia_activa / (math.sqrt(3) * voltaje * factor_potencia)
+                    formula += f"\nI = P / (√3 × V × cos φ) = {potencia_activa:.0f} / (√3 × {voltaje} × {factor_potencia}) = {corriente:.2f} A"
+
+                   
+            # ✅ Aplicar 125% si es carga continua (por norma)
+            if carga_continua:
+                corriente *= 1.25
+                formula += f"\nCarga continua (NOM-001-SEDE-2012): I × 1.25 = {corriente:.2f} A"
+
+            return corriente, formula
+
+        elif tipo_equipo == "Capacitor":
+            # IMPLEMENTACIÓN ESPECÍFICA PARA CAPACITORES
+            if unidad == "kVAR":
+                potencia_reactiva = valor * 1000  # Convertir kVAR a VAR
+                
+                # Aplicar factor de demanda si es alimentador
+                if factor_demanda < 1.0:
+                    potencia_reactiva *= factor_demanda
+                    formula = f"Capacitor: Q = {valor} kVAR × {factor_demanda} (Factor demanda) = {potencia_reactiva:.0f} VAR"
+                else:
+                    formula = f"Capacitor: Q = {valor} kVAR = {potencia_reactiva:.0f} VAR"
+                
+                if tipo_circuito == "monofasico":
+                    corriente = potencia_reactiva / voltaje
+                    formula += f"\nI = Q / V = {potencia_reactiva:.0f} / {voltaje} = {corriente:.2f} A"
+                else:
+                    corriente = potencia_reactiva / (math.sqrt(3) * voltaje)
+                    formula += f"\nI = Q / (√3 × V) = {potencia_reactiva:.0f} / (√3 × {voltaje}) = {corriente:.2f} A"
+                
+                return corriente, formula
+                
+            elif unidad == "A":
+                return float(valor), f"Corriente ingresada directamente: {valor} A"
+            else:
+                raise ValueError("Para capacitores use únicamente kVAR o A como unidad")
+
+        elif tipo_equipo == "Interruptor":
+            # Convertir potencia a watts
+            potencia = valor * (1000 if unidad == "kW" else 1)
+            
+            # Corriente base
+            corriente = potencia / (voltaje * factor_potencia)
+            corriente = round(corriente, 2)
+            
+            # Aplicar factor de seguridad 125% obligatorio (cargas generales)
+            corriente_corregida = round(corriente * 1.25, 2)
+            
+            # Buscar interruptor estándar igual o mayor
+            interruptores_estandar = [15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150]
+            interruptor = next(i for i in interruptores_estandar if i >= corriente_corregida)
+            
+            # Corriente por conductor (para n conductores en paralelo)
+            conductores_por_fase = int(conductores_por_fase)
+            corriente_conductor = round(interruptor / conductores_por_fase, 2)
+            
+            # TABLA SIMPLIFICADA para Cobre 75°C PVC (310-15(b)(16))
+            tabla_awg = [
+                (14, 20), (12, 25), (10, 35), (8, 50),
+                (6, 65), (4, 85), (3, 100), (2, 115),
+                (1, 130), ("1/0", 150), ("2/0", 175)
+            ]
+            
+            calibre = None
+            capacidad_calibre = None
+            for awg, capacidad in tabla_awg:
+                if corriente_conductor <= capacidad:
+                    calibre = awg
+                    capacidad_calibre = capacidad
+                    break
+            
+            # Calibre de tierra física (Tabla 250-122 para interruptor)
+            tabla_tierra = [
+                (15, "14 AWG"), (20, "12 AWG"), (30, "10 AWG"), (40, "10 AWG"),
+                (60, "10 AWG"), (100, "8 AWG"), (200, "6 AWG")
+            ]
+            tierra = next(t[1] for t in tabla_tierra if interruptor <= t[0])
+            
+            # Impedancia de conductor (ejemplo: 8.9 Ω/km para PVC cobre)
+            impedancia = 8.9  # ohm/km
+            longitud = float(longitud_m)
+            caida_tension = (2 * impedancia * corriente * longitud / 1000) / conductores_por_fase
+            porcentaje_caida = round((caida_tension / voltaje) * 100, 2)
+            
+            caida_tension = (2 * impedancia * corriente * longitud / 1000) / conductores_por_fase
+            porcentaje_caida = round((caida_tension / voltaje) * 100, 2)
+
+            estado_caida = '✅ CUMPLE' if porcentaje_caida <= 3 else '❌ EXCEDE 3% PERMITIDO'
+
+            formula = f"""
+            RESULTADO DEL CÁLCULO - INTERRUPTOR MONOFÁSICO
+            ============================================================
+
+            CORRIENTE: {corriente} A
+            INTERRUPTOR: {interruptor} A 1P - Termomagnético Tipo C
+            CORRIENTE POR CONDUCTOR: {corriente_conductor} A ({interruptor}A ÷ {conductores_por_fase})
+            CALIBRE: {conductores_por_fase} × {calibre} AWG cobre ({capacidad_calibre} A c/u)
+            TIERRA FÍSICA: {tierra} cobre (Tabla 250-122)
+            CAÍDA DE TENSIÓN: {porcentaje_caida}% ({caida_tension:.3f} V) {estado_caida} (máx 3% - Art. 210-19 FPN 4)
+
+            ENTRADA: {valor} {unidad} | {voltaje} V | {longitud} m
+            TIPO: CIRCUITO DERIVADO | INSTALACIÓN: CONDUIT PVC (Tabla 310-15(b)(16))
+            TEMPERATURA: {temperatura} °C | IMPEDANCIA: {impedancia} Ω/km (PVC)
+
+            FÓRMULAS APLICADAS:
+            • Corriente: I = P / (V × cos φ)
+            • Caída: ΔV = (2 × Z × I × L / 1000) / n = {caida_tension:.3f} V
+ 
+            ✓ Cumple con NOM-001-SEDE-2012: Art. 210-19 FPN 4, Tabla 310-15(b)(16), Tabla 250-122
+            """
+            
+            return corriente_corregida, formula
         else:
             # CARGAS GENÉRICAS (Potencia, Generador, etc.)
             potencia = valor * (1000 if unidad == "kW" else 1)
@@ -924,8 +1100,8 @@ class Calculos:
 
         calibres_ordenados = [
             "14", "12", "10", "8", "6", "4", "3", "2", "1",
-            "1/0", "2/0", "3/0", "4/0", "250", "300", "350",
-            "400", "500", "600", "700", "750", "800", "900", "1000", "1250", "1500", "1750", "2000"
+            "1/0", "2/0", "3/0", "4/0", "250", "300", 
+            "400", "500",
         ]
 
         for calibre in calibres_ordenados:
@@ -1188,7 +1364,9 @@ class Calculos:
         
         # DATOS PRINCIPALES - Directos al grano
         resultado += f"CORRIENTE: {corriente:.2f} A\n"
-        resultado += f"CORRIENTE CORREGIDA: {corriente_para_calibre:.2f} A (Factor {factor_aplicado.split('(')[1].split(' ')[0]})\n"
+        if tipo_equipo.lower() != "interruptor":
+             resultado += f"CORRIENTE CORREGIDA: {corriente_para_calibre:.2f} A (Factor {factor_aplicado.split('(')[1].split(' ')[0]})\n"
+         
         resultado += f"INTERRUPTOR: {interruptor_info['capacidad']} A {interruptor_info['num_polos']} - {interruptor_info['tipo_proteccion']}\n"
         
         if num_conductores > 1:
