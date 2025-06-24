@@ -6,6 +6,7 @@ from menuprincipal import MenuPrincipal  # se importa cuando logea exitosamente
 import os
 
 
+
 class LoginVentana:
     def __init__(self, master):
         self.master = master

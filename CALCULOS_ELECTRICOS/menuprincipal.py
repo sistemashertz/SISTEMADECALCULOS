@@ -21,7 +21,9 @@ class Config:
         'text_light': '#666666',
         'separator': '#E0E0E0'
     }
-    
+
+
+#Comentario de subir
     FONTS = {
         'title': ('Century Gothic', 20, 'bold'),
         'subtitle': ('Century Gothic', 18, 'bold'),

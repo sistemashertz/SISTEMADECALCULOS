@@ -1165,6 +1165,7 @@ CONDICIONES AMBIENTALES MEXICANAS:
             "Nota: Esta es una simulación para efectos de demostración."
         )
 
+
 # Función principal para ejecutar la aplicación
 def main():
     root = tk.Tk()
